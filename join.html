@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>BUZZER — Join</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="buzzer.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#06060C;--s1:#0E0E18;--s2:#161624;--bdr:#222236;
+    --txt:#E0E0F0;--dim:#55557A;--cyan:#00E5FF;--pink:#FF3E6C;
+  }
+  html,body{height:100%;overflow:hidden;touch-action:manipulation}
+  body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--txt);display:flex;flex-direction:column;align-items:center;justify-content:center}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(0,229,255,.06) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(255,62,108,.04) 0%,transparent 50%);pointer-events:none}
+
+  .wrap{position:relative;z-index:1;width:100%;max-width:400px;padding:20px;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:center}
+
+  .logo{font-family:'Orbitron',monospace;font-size:22px;font-weight:900;letter-spacing:6px;background:linear-gradient(135deg,var(--cyan),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center}
+
+  .scr{display:none;width:100%}.scr.on{display:flex;flex-direction:column;align-items:center}
+
+  /* Join form */
+  .jcard{background:var(--s1);border:1px solid var(--bdr);border-radius:16px;padding:28px 24px;width:100%;margin-top:24px}
+  .flbl{font-size:11px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
+  .inp{width:100%;padding:14px 16px;font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:600;background:var(--bg);border:1px solid var(--bdr);border-radius:10px;color:var(--txt);outline:none;transition:border-color .2s;margin-bottom:14px}
+  .inp:focus{border-color:var(--cyan)}
+  .inp::placeholder{color:var(--dim);font-weight:400}
+  .inp-code{font-family:'Orbitron',monospace;font-size:24px;font-weight:700;text-align:center;letter-spacing:8px;text-transform:uppercase}
+  .btn-join{width:100%;font-family:'Orbitron',monospace;font-size:15px;font-weight:700;letter-spacing:3px;padding:16px;border:2px solid var(--cyan);background:transparent;color:var(--cyan);border-radius:12px;cursor:pointer;transition:all .3s;text-transform:uppercase;margin-top:4px}
+  .btn-join:hover,.btn-join:active{background:var(--cyan);color:var(--bg)}
+  .btn-join:disabled{opacity:.4;cursor:wait}
+  .err{color:var(--pink);font-size:13px;text-align:center;margin-top:8px;min-height:20px}
+
+  /* Buzzer screen */
+  .bscr{height:100%;justify-content:space-between;padding-top:28px;padding-bottom:28px}
+  .banner{text-align:center}
+  .pname{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;letter-spacing:2px}
+  .status{font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-top:4px;min-height:20px}
+
+  .bwrap{display:flex;align-items:center;justify-content:center;flex:1}
+
+  /* The big buzzer */
+  .bbtn{
+    width:min(260px,68vw);height:min(260px,68vw);
+    border-radius:50%;border:none;cursor:pointer;
+    position:relative;transition:all .15s;
+    -webkit-tap-highlight-color:transparent;outline:none;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .bbtn .bt{font-family:'Orbitron',monospace;font-size:26px;font-weight:900;letter-spacing:4px;color:var(--bg);position:relative;z-index:2;text-transform:uppercase;pointer-events:none}
+  .bbtn::after{content:'';position:absolute;inset:4px;border-radius:50%;border:3px solid rgba(255,255,255,.12);pointer-events:none}
+
+  .bbtn.wait{opacity:.15;transform:scale(.88);pointer-events:none}
+  .bbtn.wait .bt{font-size:13px;letter-spacing:2px}
+  .bbtn.armed{animation:breathe 1.4s ease-in-out infinite}
+  @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+  .bbtn.armed:active{transform:scale(.9)!important;animation:none}
+  .bbtn.done{animation:none;transform:scale(.92);opacity:.6;pointer-events:none}
+
+  .res{text-align:center;min-height:55px}
+  .res-ord{font-family:'Orbitron',monospace;font-size:44px;font-weight:900}
+  .res-gap{font-size:13px;color:var(--dim);letter-spacing:2px;margin-top:2px}
+
+  /* Kicked */
+  .kicked{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999}
+  .kicked .logo{margin-bottom:20px}
+  .kicked-t{font-size:16px;color:var(--pink);letter-spacing:2px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="logo">BUZZER</div>
+
+  <!-- Join -->
+  <div class="scr on" id="scrJoin">
+    <div class="jcard">
+      <div class="flbl">Your Name</div>
+      <input class="inp" id="inpName" type="text" placeholder="Enter name" maxlength="20" autocomplete="off">
+      <div class="flbl">Room Code</div>
+      <input class="inp inp-code" id="inpCode" type="text" placeholder="XXXX" maxlength="4" autocomplete="off">
+      <button class="btn-join" id="btnJoin" onclick="doJoin()">Join</button>
+      <div class="err" id="errMsg"></div>
+    </div>
+  </div>
+
+  <!-- Buzzer -->
+  <div class="scr bscr" id="scrBuzz">
+    <div class="banner">
+      <div class="pname" id="pName"></div>
+      <div class="status" id="stTxt">Waiting for host…</div>
+    </div>
+    <div class="bwrap">
+      <button class="bbtn wait" id="buzzBtn" onclick="doBuzz()" disabled>
+        <span class="bt">WAIT</span>
+      </button>
+    </div>
+    <div class="res" id="resArea"></div>
+  </div>
+</div>
+
+<script>
+let player = null;
+let state = 'idle'; // idle, armed, buzzed, locked
+let myColor = '#00E5FF';
+
+// Pre-fill room code from URL
+const params = new URLSearchParams(location.search);
+if(params.get('room')) document.getElementById('inpCode').value = params.get('room');
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+async function doJoin(){
+  const name = document.getElementById('inpName').value.trim();
+  const code = document.getElementById('inpCode').value.trim().toUpperCase();
+  if(!name){document.getElementById('errMsg').textContent='Enter your name';return;}
+  if(!code||code.length!==4){document.getElementById('errMsg').textContent='Enter 4-character room code';return;}
+
+  const btn = document.getElementById('btnJoin');
+  btn.disabled=true; btn.textContent='CONNECTING…';
+  document.getElementById('errMsg').textContent='';
+
+  player = new BuzzerPlayer(onPlayerUpdate);
+  try {
+    const info = await player.join(code, name);
+    myColor = info.color;
+    showBuzzer(info.name, info.color);
+  } catch(e){
+    document.getElementById('errMsg').textContent = e.message || 'Failed to join';
+    btn.disabled=false; btn.textContent='JOIN';
+  }
+}
+
+function showBuzzer(name, color){
+  document.getElementById('scrJoin').classList.remove('on');
+  document.getElementById('scrBuzz').classList.add('on');
+  document.getElementById('pName').textContent = name;
+  document.getElementById('pName').style.color = color;
+  document.getElementById('pName').style.textShadow = `0 0 14px ${color}`;
+  setIdle();
+}
+
+function onPlayerUpdate(msg){
+  switch(msg.type){
+    case 'round_armed': setArmed(); break;
+    case 'round_reset': setIdle(); break;
+    case 'first_buzz':
+      if(state==='armed'){
+        playLockSound();
+        setLocked(msg.name, msg.color);
+      }
+      break;
+    case 'buzz_confirmed':
+      playClickSound();
+      setBuzzed(msg.order, msg.gap);
+      break;
+    case 'kicked': showKick(); break;
+    case 'disconnected': showKick('Disconnected from host'); break;
+  }
+}
+
+function setIdle(){
+  state='idle';
+  const b=document.getElementById('buzzBtn');
+  b.className='bbtn wait'; b.disabled=true;
+  b.querySelector('.bt').textContent='WAIT';
+  b.style.background='radial-gradient(circle at 35% 35%,#444,#333,#222)';
+  b.style.boxShadow='none';
+  document.getElementById('stTxt').textContent='Waiting for host…';
+  document.getElementById('stTxt').style.color='var(--dim)';
+  document.getElementById('resArea').innerHTML='';
+}
+
+function setArmed(){
+  state='armed';
+  const b=document.getElementById('buzzBtn');
+  b.className='bbtn armed'; b.disabled=false;
+  b.querySelector('.bt').textContent='BUZZ!';
+  b.style.background=`radial-gradient(circle at 35% 35%,${lighten(myColor,30)},${myColor},${darken(myColor,40)})`;
+  b.style.boxShadow=`0 0 50px ${myColor}50, inset 0 2px 20px rgba(255,255,255,.08)`;
+  document.getElementById('stTxt').textContent='GO!';
+  document.getElementById('stTxt').style.color=myColor;
+  document.getElementById('resArea').innerHTML='';
+}
+
+function setBuzzed(order, gap){
+  state='buzzed';
+  const b=document.getElementById('buzzBtn');
+  b.className='bbtn done'; b.disabled=true;
+  b.querySelector('.bt').textContent=`#${order}`;
+  if(order===1){
+    document.getElementById('stTxt').textContent='🏆 FIRST!';
+    document.getElementById('stTxt').style.color=myColor;
+    document.getElementById('resArea').innerHTML=`<div class="res-ord" style="color:${myColor};text-shadow:0 0 18px ${myColor}">🏆 #1</div>`;
+  } else {
+    document.getElementById('stTxt').textContent=`#${order}`;
+    document.getElementById('stTxt').style.color='var(--dim)';
+    document.getElementById('resArea').innerHTML=`<div class="res-ord" style="color:${myColor}">#${order}</div><div class="res-gap">+${gap}ms behind</div>`;
+  }
+}
+
+function setLocked(firstName, firstColor){
+  if(state!=='armed') return;
+  state='locked';
+  const b=document.getElementById('buzzBtn');
+  b.className='bbtn done'; b.disabled=true;
+  b.querySelector('.bt').textContent='✕';
+  b.style.background='radial-gradient(circle at 35% 35%,#444,#333,#222)';
+  b.style.boxShadow='none';
+  document.getElementById('stTxt').textContent='LOCKED OUT';
+  document.getElementById('stTxt').style.color='var(--pink)';
+  document.getElementById('resArea').innerHTML=`<div style="color:${firstColor};font-family:'Orbitron',monospace;font-weight:700;font-size:15px">${esc(firstName)} was first</div>`;
+}
+
+function doBuzz(){
+  if(state!=='armed'||!player) return;
+  player.buzz();
+}
+
+function showKick(msg){
+  const o=document.createElement('div');
+  o.className='kicked';
+  o.innerHTML=`<div class="logo">BUZZER</div><div class="kicked-t">${msg||'You were removed from the room'}</div>`;
+  document.body.appendChild(o);
+}
+
+function lighten(hex,pct){const n=parseInt(hex.replace('#',''),16),a=Math.round(2.55*pct);return'#'+(0x1000000+Math.min(255,(n>>16)+a)*0x10000+Math.min(255,((n>>8)&0xFF)+a)*0x100+Math.min(255,(n&0xFF)+a)).toString(16).slice(1)}
+function darken(hex,pct){const n=parseInt(hex.replace('#',''),16),a=Math.round(2.55*pct);return'#'+(0x1000000+Math.max(0,(n>>16)-a)*0x10000+Math.max(0,((n>>8)&0xFF)-a)*0x100+Math.max(0,(n&0xFF)-a)).toString(16).slice(1)}
+
+// Keyboard
+document.getElementById('inpName').addEventListener('keyup',e=>{if(e.key==='Enter')document.getElementById('inpCode').focus()});
+document.getElementById('inpCode').addEventListener('keyup',e=>{if(e.key==='Enter')doJoin()});
+document.getElementById('inpName').focus();
+</script>
+</body>
+</html>
