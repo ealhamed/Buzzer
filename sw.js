@@ -1,4 +1,4 @@
-const CACHE = 'buzzer-v2';
+const CACHE = 'buzzer-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -23,17 +23,13 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Network-first for PeerJS and external CDNs
-  if (!e.request.url.startsWith(self.location.origin)) {
-    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
-    return;
-  }
-  // Cache-first for local assets
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request).then(resp => {
-      const clone = resp.clone();
-      caches.open(CACHE).then(c => c.put(e.request, clone));
+    fetch(e.request).then(resp => {
+      if (resp.ok && e.request.url.startsWith(self.location.origin)) {
+        const clone = resp.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+      }
       return resp;
-    }))
+    }).catch(() => caches.match(e.request))
   );
 });
