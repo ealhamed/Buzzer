@@ -2,61 +2,51 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#06060C">
 <link rel="manifest" href="manifest.json">
-<title>BUZZER</title>
+<title>BUZZER — Real-time Game Buzzer</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;overflow:hidden}
-  body{font-family:'Rajdhani',sans-serif;background:#06060C;color:#E8E8F0;display:flex;align-items:center;justify-content:center}
-  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 25% 15%,rgba(0,229,255,.07) 0%,transparent 55%),radial-gradient(ellipse at 75% 85%,rgba(255,62,108,.05) 0%,transparent 55%);pointer-events:none}
-  body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:999}
-  .c{position:relative;z-index:1;text-align:center;padding:24px;width:100%;max-width:380px}
-  .logo{font-family:'Orbitron',monospace;font-size:clamp(42px,12vw,68px);font-weight:900;letter-spacing:14px;background:linear-gradient(135deg,#00E5FF 0%,#76FF03 40%,#FF3E6C 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:glow 4s ease-in-out infinite alternate}
-  @keyframes glow{0%{filter:brightness(1) drop-shadow(0 0 8px rgba(0,229,255,.3))}100%{filter:brightness(1.1) drop-shadow(0 0 16px rgba(255,62,108,.3))}}
-  .tag{font-size:12px;color:#4A4A64;letter-spacing:6px;text-transform:uppercase;margin:4px 0 50px}
-  .btns{display:flex;flex-direction:column;gap:14px}
-  .b{display:block;text-decoration:none;font-family:'Orbitron',monospace;font-size:15px;font-weight:700;letter-spacing:4px;padding:20px;border-radius:14px;text-transform:uppercase;transition:all .3s cubic-bezier(.34,1.56,.64,1);text-align:center}
-  .bh{border:2px solid #00E5FF;color:#00E5FF;background:rgba(0,229,255,.04)}
-  .bh:hover{background:#00E5FF;color:#06060C;box-shadow:0 0 40px rgba(0,229,255,.35);transform:scale(1.03)}
-  .bj{border:2px solid #FF3E6C;color:#FF3E6C;background:rgba(255,62,108,.04)}
-  .bj:hover{background:#FF3E6C;color:#06060C;box-shadow:0 0 40px rgba(255,62,108,.35);transform:scale(1.03)}
-  .ft{margin-top:50px;font-size:11px;color:#2A2A3E;letter-spacing:3px;text-transform:uppercase;line-height:1.8}
-  .c>*{opacity:0;transform:translateY(14px);animation:fu .6s ease forwards}
-  .c>*:nth-child(1){animation-delay:.1s}.c>*:nth-child(2){animation-delay:.2s}.c>*:nth-child(3){animation-delay:.35s}.c>*:nth-child(4){animation-delay:.55s}
-  @keyframes fu{to{opacity:1;transform:translateY(0)}}
-  .install-btn{display:none;margin-top:16px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;padding:10px 20px;border:1px solid #333;background:rgba(255,255,255,.04);color:#777;border-radius:10px;cursor:pointer;text-transform:uppercase;transition:all .2s}
-  .install-btn:hover{border-color:#555;color:#aaa}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Rajdhani',sans-serif;background:#06060C;color:#E8E8F0;display:flex;align-items:center;justify-content:center}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 25% 15%,rgba(0,229,255,.07) 0%,transparent 55%),radial-gradient(ellipse at 75% 85%,rgba(255,62,108,.05) 0%,transparent 55%);pointer-events:none}
+main{position:relative;z-index:1;text-align:center;padding:24px;width:100%;max-width:440px}
+.logo{font-family:'Orbitron',monospace;font-size:clamp(42px,12vw,68px);font-weight:900;letter-spacing:14px;padding-right:14px;background:linear-gradient(135deg,#00E5FF 0%,#76FF03 40%,#FF3E6C 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:glow 4s ease-in-out infinite alternate}
+@keyframes glow{0%{filter:brightness(1) drop-shadow(0 0 8px rgba(0,229,255,.3))}100%{filter:brightness(1.1) drop-shadow(0 0 16px rgba(255,62,108,.3))}}
+.tag{font-size:13px;color:#9090A8;letter-spacing:6px;text-transform:uppercase;margin:4px 0 50px}
+nav{display:flex;flex-direction:column;gap:14px}
+.b{display:block;text-decoration:none;font-family:'Orbitron',monospace;font-size:15px;font-weight:700;letter-spacing:4px;padding:20px;border-radius:14px;text-transform:uppercase;transition:all .3s cubic-bezier(.34,1.56,.64,1);text-align:center}
+.bh{border:2px solid #00E5FF;color:#00E5FF;background:rgba(0,229,255,.04)}
+.bh:hover,.bh:focus-visible{background:#00E5FF;color:#06060C;box-shadow:0 0 40px rgba(0,229,255,.35);transform:scale(1.03);outline:none}
+.bj{border:2px solid #FF3E6C;color:#FF3E6C;background:rgba(255,62,108,.04)}
+.bj:hover,.bj:focus-visible{background:#FF3E6C;color:#06060C;box-shadow:0 0 40px rgba(255,62,108,.35);transform:scale(1.03);outline:none}
+footer{margin-top:50px;font-size:12px;color:#8888A0;letter-spacing:3px;text-transform:uppercase;line-height:1.8}
+.install-btn{display:none;margin-top:16px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;padding:10px 20px;border:1px solid #444;background:rgba(255,255,255,.04);color:#9090A8;border-radius:10px;cursor:pointer;text-transform:uppercase;transition:all .2s}
+.install-btn:hover{border-color:#666;color:#ccc}
+main>*{opacity:0;transform:translateY(14px);animation:fu .6s ease forwards}
+main>*:nth-child(1){animation-delay:.1s}main>*:nth-child(2){animation-delay:.2s}main>*:nth-child(3){animation-delay:.35s}main>*:nth-child(4){animation-delay:.55s}
+@keyframes fu{to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
-<div class="c">
-  <div class="logo">BUZZER</div>
-  <div class="tag">Real-time game buzzer</div>
-  <div class="btns">
-    <a href="host.html" class="b bh">⚡ Host Game</a>
-    <a href="join.html" class="b bj">🎮 Join Game</a>
-    <button class="install-btn" id="installBtn" onclick="installPWA()">📲 Install App</button>
-  </div>
-  <div class="ft">Peer-to-Peer · Up to 16 Players<br>Teams · Sound Themes · Reconnect</div>
-</div>
+<main>
+  <h1 class="logo">BUZZER</h1>
+  <p class="tag">Real-time game buzzer</p>
+  <nav aria-label="Main navigation">
+    <a href="host.html" class="b bh" role="button">⚡ Host Game</a>
+    <a href="join.html" class="b bj" role="button">🎮 Join Game</a>
+    <button class="install-btn" id="installBtn" onclick="installPWA()" aria-label="Install app to home screen">📲 Install App</button>
+  </nav>
+  <footer>Peer-to-Peer · Up to 16 Players<br>Teams · Reconnect Support</footer>
+</main>
 <script>
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById('installBtn').style.display = 'block';
-  });
-  function installPWA(){
-    if(!deferredPrompt) return;
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(() => { deferredPrompt = null; document.getElementById('installBtn').style.display='none'; });
-  }
-  if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('installBtn').style.display='block';});
+function installPWA(){if(!deferredPrompt)return;deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('installBtn').style.display='none';});}
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>

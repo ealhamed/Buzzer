@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#06060C">
 <title>BUZZER — Play</title>
@@ -10,302 +10,387 @@
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="buzzer.js"></script>
 <style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  :root{--bg:#06060C;--s1:#0E0E18;--s2:#161624;--bdr:#222236;--txt:#E0E0F0;--dim:#55557A;--cyan:#00E5FF;--pink:#FF3E6C;--green:#76FF03;--yellow:#FFD600;--orange:#FF9100}
-  html,body{height:100%;overflow:hidden;touch-action:manipulation}
-  body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--txt)}
-  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(0,229,255,.05) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(255,62,108,.03) 0%,transparent 50%);pointer-events:none}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#06060C;--s1:#0E0E18;--s2:#161624;--bdr:#222236;--txt:#E0E0F0;--dim:#8888A0;--cyan:#00E5FF;--pink:#FF3E6C;--green:#76FF03;--yellow:#FFD600;--orange:#FF9100}
+html,body{height:100%;overflow:hidden;touch-action:manipulation}
+body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--txt)}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(0,229,255,.05) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(255,62,108,.03) 0%,transparent 50%);pointer-events:none}
+main{position:relative;z-index:1;width:100%;max-width:480px;padding:12px;margin:0 auto;height:100%;display:flex;flex-direction:column}
+.scr{display:none;width:100%;flex:1}.scr.on{display:flex;flex-direction:column}
 
-  .wrap{position:relative;z-index:1;width:100%;max-width:440px;padding:16px;margin:0 auto;height:100%;display:flex;flex-direction:column}
-  .logo{font-family:'Orbitron',monospace;font-size:clamp(22px,6vw,28px);font-weight:900;letter-spacing:5px;background:linear-gradient(135deg,var(--cyan),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;padding:10px 0 6px;flex-shrink:0}
-  .scr{display:none;width:100%;flex:1}.scr.on{display:flex;flex-direction:column}
+/* Header */
+.hbar{display:flex;align-items:center;padding:6px 10px;background:var(--s1);border-radius:10px;gap:6px;flex-shrink:0}
+.back-btn{width:30px;height:30px;background:var(--s2);border:1px solid var(--bdr);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;color:var(--dim);text-decoration:none;transition:all .2s;flex-shrink:0}
+.back-btn:hover,.back-btn:focus-visible{border-color:var(--cyan);color:var(--cyan);outline:none}
+.hbar-logo{font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:3px;padding-right:3px;background:linear-gradient(135deg,var(--cyan),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-  /* Join */
-  .jcard{background:var(--s1);border:1px solid var(--bdr);border-radius:16px;padding:28px 22px;margin:auto 0}
-  .flbl{font-size:clamp(11px,3vw,13px);letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
-  .inp{width:100%;padding:14px 16px;font-family:'Rajdhani',sans-serif;font-size:clamp(18px,5vw,22px);font-weight:600;background:var(--bg);border:1px solid var(--bdr);border-radius:12px;color:var(--txt);outline:none;transition:border-color .2s;margin-bottom:14px}
-  .inp:focus{border-color:var(--cyan)}
-  .inp::placeholder{color:#444;font-weight:400}
-  .inp-code{font-family:'Orbitron',monospace;font-size:clamp(24px,7vw,32px);font-weight:700;text-align:center;letter-spacing:10px;text-transform:uppercase}
-  .btn-join{width:100%;font-family:'Orbitron',monospace;font-size:clamp(15px,4vw,18px);font-weight:700;letter-spacing:3px;padding:16px;border:2px solid var(--cyan);background:transparent;color:var(--cyan);border-radius:14px;cursor:pointer;transition:all .3s;text-transform:uppercase}
-  .btn-join:hover,.btn-join:active{background:var(--cyan);color:var(--bg)}
-  .btn-join:disabled{opacity:.4;cursor:wait}
-  .err{color:var(--pink);font-size:clamp(12px,3.5vw,14px);text-align:center;margin-top:8px;min-height:20px}
+/* Join form */
+.jcard{background:var(--s1);border:1px solid var(--bdr);border-radius:16px;padding:28px 22px;margin:auto 0}
+.flbl{font-size:14px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:6px;font-weight:600}
+.inp{width:100%;padding:16px;font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:600;background:var(--bg);border:1px solid var(--bdr);border-radius:12px;color:var(--txt);outline:none;transition:border-color .2s;margin-bottom:14px}
+.inp:focus{border-color:var(--cyan)}
+.inp::placeholder{color:#555;font-weight:400}
+.inp-code{font-family:'Orbitron',monospace;font-size:28px;font-weight:700;text-align:center;letter-spacing:10px;text-transform:uppercase}
+.btn-join{width:100%;font-family:'Orbitron',monospace;font-size:18px;font-weight:700;letter-spacing:3px;padding:18px;border:2px solid var(--cyan);background:transparent;color:var(--cyan);border-radius:14px;cursor:pointer;transition:all .3s;text-transform:uppercase}
+.btn-join:hover,.btn-join:active,.btn-join:focus-visible{background:var(--cyan);color:var(--bg);outline:none}
+.btn-join:disabled{opacity:.4;cursor:wait}
+.err{color:var(--pink);font-size:14px;text-align:center;margin-top:8px;min-height:20px}
 
-  /* Buzzer screen */
-  .bscr{justify-content:space-between}
-  .topbar{text-align:center;flex-shrink:0;padding:4px 0}
-  .pname{font-family:'Orbitron',monospace;font-size:clamp(18px,5vw,24px);font-weight:700;letter-spacing:2px}
-  .pteam{font-size:clamp(13px,3.5vw,16px);margin-top:2px;letter-spacing:1px;font-weight:600}
-  .status{font-size:clamp(14px,4vw,18px);letter-spacing:2px;text-transform:uppercase;margin-top:3px;min-height:22px;font-weight:600}
+/* Buzzer screen */
+.bscr{justify-content:space-between}
 
-  /* Lobby */
-  .lobby-toggle{width:100%;padding:10px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;color:var(--dim);font-family:'Rajdhani',sans-serif;font-size:clamp(13px,3.5vw,15px);font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .2s;flex-shrink:0;margin-top:8px}
-  .lobby-toggle:hover{border-color:var(--cyan);color:var(--cyan)}
-  .lobby-panel{display:none;background:var(--s1);border:1px solid var(--bdr);border-radius:0 0 10px 10px;border-top:none;padding:12px;flex-shrink:0;max-height:45vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
-  .lobby-panel.open{display:block}
-  .lp{display:flex;align-items:center;gap:8px;padding:7px 8px;font-size:clamp(13px,3.5vw,15px);border-radius:7px}
-  .lp-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-  .lp-name{flex:1;font-weight:600}
-  .lp-team-badge{font-size:clamp(10px,2.8vw,12px);padding:2px 7px;border-radius:8px;font-weight:600}
-  .lp-idle{font-size:clamp(9px,2.5vw,11px);color:var(--orange);font-family:'Orbitron',monospace}
-  .lp-you{font-size:clamp(9px,2.5vw,11px);color:var(--cyan);font-family:'Orbitron',monospace}
+/* Top bar */
+.topbar{text-align:center;flex-shrink:0;padding:8px 0 2px}
+.pname{font-family:'Orbitron',monospace;font-size:clamp(22px,6vw,30px);font-weight:700;letter-spacing:3px}
+.pteam{font-size:clamp(14px,3.5vw,18px);margin-top:2px;letter-spacing:1px;font-weight:600}
+.status{font-size:clamp(16px,4.5vw,22px);letter-spacing:3px;text-transform:uppercase;margin-top:4px;min-height:26px;font-weight:700}
 
-  /* Teams */
-  .team-section{margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr)}
-  .team-hd{font-size:clamp(10px,2.8vw,12px);letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:8px}
-  .team-btns{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
-  .team-join-btn{font-size:clamp(12px,3.2vw,14px);padding:7px 12px;border-radius:10px;border:1px solid var(--bdr);background:var(--s2);color:var(--txt);cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:6px}
-  .team-join-btn:hover{border-color:var(--cyan)}
-  .team-join-btn.active{border-color:var(--green);color:var(--green)}
-  .team-join-btn:disabled{opacity:.35;cursor:not-allowed}
-  .team-join-btn .tdot{width:9px;height:9px;border-radius:50%}
-  .leave-btn{font-size:clamp(11px,3vw,13px);padding:5px 10px;border:1px solid var(--bdr);background:transparent;color:var(--dim);border-radius:8px;cursor:pointer}
-  .leave-btn:hover{border-color:var(--pink);color:var(--pink)}
-  .leave-btn:disabled{opacity:.35;cursor:not-allowed}
-  .locked-msg{font-size:clamp(11px,3vw,13px);color:var(--orange);letter-spacing:1px;font-weight:600;padding:4px 0}
-  .create-team-row{display:flex;gap:5px;margin-top:8px;align-items:center}
-  .ct-inp{flex:1;padding:8px 10px;font-family:'Rajdhani',sans-serif;font-size:clamp(13px,3.5vw,15px);font-weight:600;background:var(--bg);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);outline:none}
-  .ct-inp:focus{border-color:var(--cyan)}
-  .ct-colors{display:flex;gap:4px;align-items:center}
-  .ct-color{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all .15s}
-  .ct-color.sel{border-color:#fff;transform:scale(1.2)}
-  .ct-go{font-size:clamp(12px,3.2vw,14px);padding:7px 14px;border:1px solid var(--cyan);background:transparent;color:var(--cyan);border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700}
-  .ct-go:hover{background:var(--cyan);color:var(--bg)}
+/* Lobby toggle */
+.lobby-toggle{width:100%;padding:10px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;color:var(--dim);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .2s;flex-shrink:0;margin-top:6px}
+.lobby-toggle:hover,.lobby-toggle:focus-visible{border-color:var(--cyan);color:var(--cyan);outline:none}
+.lobby-panel{display:none;background:var(--s1);border:1px solid var(--bdr);border-radius:0 0 10px 10px;border-top:none;padding:12px;flex-shrink:0;max-height:40vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.lobby-panel.open{display:block}
 
-  /* Buzzer button */
-  .bwrap{display:flex;align-items:center;justify-content:center;flex:1;min-height:0}
-  .bbtn{width:min(260px,62vw);height:min(260px,62vw);border-radius:50%;border:none;cursor:pointer;position:relative;transition:all .12s;-webkit-tap-highlight-color:transparent;outline:none;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .bbtn .bt{font-family:'Orbitron',monospace;font-size:clamp(22px,6vw,30px);font-weight:900;letter-spacing:4px;color:var(--bg);position:relative;z-index:2;text-transform:uppercase;pointer-events:none}
-  .bbtn::after{content:'';position:absolute;inset:4px;border-radius:50%;border:3px solid rgba(255,255,255,.1);pointer-events:none}
-  .bbtn.wait{opacity:.12;transform:scale(.85);pointer-events:none}
-  .bbtn.wait .bt{font-size:clamp(12px,3.5vw,16px);letter-spacing:2px}
-  .bbtn.armed{animation:breathe 1.4s ease-in-out infinite}
-  @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-  .bbtn.armed:active{transform:scale(.88)!important;animation:none}
-  .bbtn.done{animation:none;transform:scale(.9);opacity:.5;pointer-events:none}
-  .bbtn.penalty{animation:penFlash .6s ease-in-out infinite}
-  @keyframes penFlash{0%,100%{opacity:.3}50%{opacity:.15}}
+.lp{display:flex;align-items:center;gap:8px;padding:6px;font-size:14px;border-radius:6px}
+.lp-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.lp-name{flex:1;font-weight:600}
+.lp-team-badge{font-size:11px;padding:2px 7px;border-radius:8px;font-weight:600}
+.lp-idle{font-size:11px;color:var(--orange);font-family:'Orbitron',monospace}
+.lp-you{font-size:11px;color:var(--cyan);font-family:'Orbitron',monospace;font-weight:700}
 
-  .res{text-align:center;min-height:52px;flex-shrink:0;padding-bottom:6px}
-  .res-ord{font-family:'Orbitron',monospace;font-size:clamp(34px,10vw,48px);font-weight:900}
-  .res-gap{font-size:clamp(13px,3.5vw,15px);color:var(--dim);letter-spacing:2px;margin-top:2px}
-  .res-pen{font-family:'Orbitron',monospace;font-size:clamp(18px,5vw,24px);font-weight:700;color:var(--orange)}
+/* Team controls in lobby */
+.team-section{margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr)}
+.team-hd{font-size:13px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:8px}
+.team-btns{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.team-join-btn{font-size:15px;padding:8px 14px;border-radius:10px;border:1px solid var(--bdr);background:var(--s2);color:var(--txt);cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:6px}
+.team-join-btn:hover,.team-join-btn:focus-visible{border-color:var(--cyan);outline:none}
+.team-join-btn.active{border-color:var(--green);color:var(--green)}
+.team-join-btn .tdot{width:9px;height:9px;border-radius:50%}
+.leave-btn{font-size:13px;padding:6px 12px;border:1px solid var(--bdr);background:transparent;color:var(--dim);border-radius:8px;cursor:pointer}
+.leave-btn:hover,.leave-btn:focus-visible{border-color:var(--pink);color:var(--pink);outline:none}
+.ct-row{display:flex;gap:6px;margin-top:8px;align-items:center}
+.ct-inp{flex:1;padding:10px 12px;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;background:var(--bg);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);outline:none}
+.ct-inp:focus{border-color:var(--cyan)}
+.ct-colors{display:flex;gap:5px;align-items:center}
+.ct-color{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all .15s}
+.ct-color:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.ct-color.sel{border-color:#fff;transform:scale(1.15)}
+.ct-go{font-size:14px;padding:8px 14px;border:1px solid var(--cyan);background:transparent;color:var(--cyan);border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;transition:all .2s}
+.ct-go:hover,.ct-go:focus-visible{background:var(--cyan);color:var(--bg);outline:none}
 
-  .overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999}
-  .overlay .logo{margin-bottom:16px}
-  .overlay-t{font-size:clamp(15px,4vw,18px);color:var(--pink);letter-spacing:2px}
-  .overlay-sub{font-size:clamp(12px,3.2vw,14px);color:var(--dim);margin-top:8px}
+/* The buzzer */
+.bwrap{display:flex;align-items:center;justify-content:center;flex:1;min-height:0}
+.bbtn{
+  width:min(260px,65vw);height:min(260px,65vw);
+  border-radius:50%;border:none;cursor:pointer;position:relative;
+  transition:all .12s;-webkit-tap-highlight-color:transparent;outline:none;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.bbtn:focus-visible{outline:3px solid #fff;outline-offset:4px}
+.bbtn .bt{font-family:'Orbitron',monospace;font-size:clamp(24px,7vw,32px);font-weight:900;letter-spacing:4px;color:var(--bg);position:relative;z-index:2;text-transform:uppercase;pointer-events:none}
+.bbtn::after{content:'';position:absolute;inset:4px;border-radius:50%;border:3px solid rgba(255,255,255,.1);pointer-events:none}
+.bbtn.wait{opacity:.12;transform:scale(.85);pointer-events:none}
+.bbtn.wait .bt{font-size:clamp(13px,3.5vw,16px);letter-spacing:2px}
+.bbtn.armed{animation:breathe 1.4s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.bbtn.armed:active{transform:scale(.88)!important;animation:none}
+.bbtn.done{animation:none;transform:scale(.9);opacity:.5;pointer-events:none}
+.bbtn.penalty{animation:penFlash .6s ease-in-out infinite}
+@keyframes penFlash{0%,100%{opacity:.3}50%{opacity:.15}}
+
+.res{text-align:center;min-height:60px;flex-shrink:0;padding-bottom:8px}
+.res-ord{font-family:'Orbitron',monospace;font-size:clamp(38px,10vw,52px);font-weight:900}
+.res-gap{font-size:15px;color:var(--dim);letter-spacing:2px;margin-top:2px}
+.res-pen{font-family:'Orbitron',monospace;font-size:clamp(20px,6vw,28px);font-weight:700;color:var(--orange)}
+.res-who{font-family:'Orbitron',monospace;font-weight:700;font-size:clamp(15px,4vw,20px)}
+
+/* Overlay */
+.overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999}
+.overlay .hbar-logo{font-size:20px;margin-bottom:16px}
+.overlay-t{font-size:18px;color:var(--pink);letter-spacing:2px}
+.overlay-sub{font-size:14px;color:var(--dim);margin-top:10px}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="logo">BUZZER</div>
-  <div class="scr on" id="scrJoin">
-    <div class="jcard">
-      <div class="flbl">Your Name</div>
-      <input class="inp" id="inpName" type="text" placeholder="Enter name" maxlength="20" autocomplete="off">
-      <div class="flbl">Room Code</div>
-      <input class="inp inp-code" id="inpCode" type="text" placeholder="XXXX" maxlength="4" autocomplete="off">
-      <button class="btn-join" id="btnJoin" onclick="doJoin()">Join</button>
-      <div class="err" id="errMsg"></div>
+
+<main>
+  <header>
+    <div class="hbar">
+      <a href="index.html" class="back-btn" aria-label="Back to home">←</a>
+      <div class="hbar-logo">BUZZER</div>
     </div>
+  </header>
+
+  <!-- Join -->
+  <div class="scr on" id="scrJoin">
+    <form class="jcard" onsubmit="doJoin();return false;" novalidate>
+      <label class="flbl" for="inpName">Your name</label>
+      <input class="inp" id="inpName" type="text" placeholder="Enter name" maxlength="20" autocomplete="off" required>
+      <label class="flbl" for="inpCode">Room code</label>
+      <input class="inp inp-code" id="inpCode" type="text" placeholder="XXXX" maxlength="4" autocomplete="off" required>
+      <button class="btn-join" id="btnJoin" type="submit">Join</button>
+      <div class="err" id="errMsg" role="alert"></div>
+    </form>
   </div>
+
+  <!-- Buzzer -->
   <div class="scr bscr" id="scrBuzz">
-    <div class="topbar">
+    <section class="topbar" aria-label="Player info">
       <div class="pname" id="pName"></div>
       <div class="pteam" id="pTeam"></div>
-      <div class="status" id="stTxt">Waiting for host…</div>
-    </div>
-    <button class="lobby-toggle" id="lobbyToggle" onclick="toggleLobby()">▼ Lobby (0 players)</button>
-    <div class="lobby-panel" id="lobbyPanel">
+      <div class="status" id="stTxt" role="status" aria-live="polite">Waiting for host…</div>
+    </section>
+
+    <button class="lobby-toggle" id="lobbyToggle" onclick="toggleLobby()" aria-expanded="false" aria-controls="lobbyPanel">▼ Lobby (0 players)</button>
+    <div class="lobby-panel" id="lobbyPanel" role="region" aria-label="Game lobby">
       <div id="lobbyList"></div>
       <div class="team-section" id="teamSection">
         <div class="team-hd">Teams</div>
-        <div class="team-btns" id="teamBtns"></div>
-        <div id="lockMsg"></div>
-        <div class="create-team-row" id="ctRow">
-          <input class="ct-inp" id="ctName" placeholder="New team name" maxlength="16">
-          <div class="ct-colors" id="ctColors"></div>
-          <button class="ct-go" onclick="createTeam()">+</button>
+        <div class="team-btns" id="teamBtns" role="group" aria-label="Team selection"></div>
+        <div class="ct-row" id="ctRow">
+          <input class="ct-inp" id="ctName" placeholder="New team name" maxlength="16" aria-label="New team name">
+          <div class="ct-colors" id="ctColors" role="group" aria-label="Team color selection"></div>
+          <button class="ct-go" onclick="createTeam()" aria-label="Create new team">+</button>
         </div>
       </div>
     </div>
+
     <div class="bwrap">
-      <button class="bbtn wait" id="buzzBtn" onclick="doBuzz()" disabled>
+      <button class="bbtn wait" id="buzzBtn" onclick="doBuzz()" disabled aria-label="Buzz button — waiting for round to start">
         <span class="bt">WAIT</span>
       </button>
     </div>
-    <div class="res" id="resArea"></div>
+    <div class="res" id="resArea" role="status" aria-live="polite"></div>
   </div>
-</div>
+</main>
+
 <script>
 let player=null,state='idle',myColor='#00E5FF',myTeam=null;
 let lobbyOpen=false,teamsData=[],playersData=[],teamsLocked=false;
-let penaltyTimer=null,penaltyActive=false,selColorIdx=0;
+let penaltyTimer=null,selColorIdx=0;
+
 const TEAM_COLORS=[{name:'Crimson',hex:'#FF3E6C'},{name:'Cyan',hex:'#00E5FF'},{name:'Lime',hex:'#76FF03'},{name:'Amber',hex:'#FFD600'}];
 const params=new URLSearchParams(location.search);
 if(params.get('room'))document.getElementById('inpCode').value=params.get('room');
 
 function renderColorPicks(){
   document.getElementById('ctColors').innerHTML=TEAM_COLORS.map((c,i)=>
-    `<div class="ct-color ${i===selColorIdx?'sel':''}" style="background:${c.hex}" onclick="selColorIdx=${i};renderColorPicks()"></div>`
+    `<div class="ct-color ${i===selColorIdx?'sel':''}" style="background:${c.hex}" onclick="selColorIdx=${i};renderColorPicks()" tabindex="0" role="radio" aria-checked="${i===selColorIdx}" aria-label="${c.name}"></div>`
   ).join('');
 }
 renderColorPicks();
 
-async function doJoin(){
-  const name=document.getElementById('inpName').value.trim(),code=document.getElementById('inpCode').value.trim().toUpperCase();
+function doJoin(){
+  const name=document.getElementById('inpName').value.trim();
+  const code=document.getElementById('inpCode').value.trim().toUpperCase();
   if(!name){document.getElementById('errMsg').textContent='Enter your name';return;}
   if(!code||code.length!==4){document.getElementById('errMsg').textContent='Enter 4-character room code';return;}
-  const btn=document.getElementById('btnJoin');btn.disabled=true;btn.textContent='CONNECTING…';
+  const btn=document.getElementById('btnJoin');
+  btn.disabled=true;btn.textContent='CONNECTING…';
   document.getElementById('errMsg').textContent='';
+
   player=new BuzzerPlayer(onPlayerUpdate);
-  try{
-    const info=await player.join(code,name);
+  player.join(code,name).then(info=>{
     myColor=info.color;
     if(info.teams)teamsData=info.teams;
     if(info.teamsLocked!=null)teamsLocked=info.teamsLocked;
     if(info.rejoined&&info.team)myTeam=info.team;
     showBuzzer(info.name,info.color);
-  }catch(e){document.getElementById('errMsg').textContent=e.message||'Failed';btn.disabled=false;btn.textContent='JOIN';}
+  }).catch(e=>{
+    document.getElementById('errMsg').textContent=e.message||'Failed to join';
+    btn.disabled=false;btn.textContent='JOIN';
+  });
 }
 
-function showBuzzer(n,c){
+function showBuzzer(name,color){
   document.getElementById('scrJoin').classList.remove('on');
   document.getElementById('scrBuzz').classList.add('on');
-  const pn=document.getElementById('pName');pn.textContent=n;pn.style.color=c;pn.style.textShadow=`0 0 12px ${c}`;
-  updateTeamDisplay();setIdle();
+  document.getElementById('pName').textContent=name;
+  document.getElementById('pName').style.color=color;
+  document.getElementById('pName').style.textShadow='0 0 12px '+color;
+  updateTeamDisplay();
+  setIdle();
 }
 
 function onPlayerUpdate(msg){
   switch(msg.type){
-    case 'round_armed':setArmed();break;
-    case 'round_reset':clearPenalty();setIdle();break;
-    case 'first_buzz':if(state==='armed'&&!penaltyActive){playSound('lock');hapticBuzz(40);setLocked(msg.name,msg.color);}break;
-    case 'buzz_confirmed':playSound('click');hapticBuzz(100);setBuzzed(msg.order,msg.gap);break;
-    case 'penalty':startPenalty(msg.seconds);break;
-    case 'penalty_active':startPenalty(msg.remaining);break;
-    case 'team_penalized':if(myTeam===msg.teamId)startPenalty(msg.seconds);break;
-    case 'lobby':
+    case'round_armed':setArmed();break;
+    case'round_reset':setIdle();break;
+    case'first_buzz':
+      if(state==='armed'){playSound('lock');hapticBuzz(40);setLocked(msg.name,msg.color,msg.team);}
+      break;
+    case'buzz_confirmed':playSound('click');hapticBuzz(100);setBuzzed(msg.order,msg.gap);break;
+    case'penalty':setPenalty(msg.seconds);break;
+    case'penalty_active':setPenalty(msg.remaining);break;
+    case'team_penalized':if(myTeam===msg.teamId)setPenalty(msg.seconds);break;
+    case'lobby':
       playersData=msg.players||[];teamsData=msg.teams||[];teamsLocked=msg.teamsLocked||false;
-      if(player&&player.myId){const me=playersData.find(p=>p.id===player.myId);if(me&&me.team)myTeam=me.team;}
       renderLobby();break;
-    case 'teams_locked':teamsLocked=true;renderLobby();break;
-    case 'teams_unlocked':teamsLocked=false;renderLobby();break;
-    case 'sound_theme':setSoundTheme(msg.theme);break;
-    case 'kicked':showOverlay('You were removed from the room');break;
-    case 'disconnected':showOverlay('Disconnected from host','Refresh to reconnect');break;
-    case 'error':if(state==='idle')document.getElementById('errMsg').textContent=msg.message;break;
+    case'teams_locked':teamsLocked=true;renderLobby();break;
+    case'teams_unlocked':teamsLocked=false;renderLobby();break;
+    case'kicked':showOverlay('You were removed from the room');break;
+    case'disconnected':showOverlay('Disconnected from host','Refresh to reconnect');break;
+    case'error':if(state==='idle')document.getElementById('errMsg').textContent=msg.message;break;
   }
 }
 
 function renderLobby(){
-  document.getElementById('lobbyToggle').textContent=(lobbyOpen?'▲':'▼')+` Lobby (${playersData.length} players)`;
+  const toggle=document.getElementById('lobbyToggle');
+  toggle.textContent=(lobbyOpen?'▲':'▼')+' Lobby ('+playersData.length+' players)';
+
   const teamMap=new Map();teamsData.forEach(t=>teamMap.set(t.id,t));
-  document.getElementById('lobbyList').innerHTML=playersData.map(p=>{
+  let html=playersData.map(p=>{
     const isMe=player&&p.id===player.myId;
-    const tm=p.team&&teamMap.has(p.team)?`<span class="lp-team-badge" style="background:${teamMap.get(p.team).color}22;color:${teamMap.get(p.team).color}">${esc(teamMap.get(p.team).name)}</span>`:'';
-    return `<div class="lp" style="opacity:${p.idle?.4:1}"><div class="lp-dot" style="background:${p.color}"></div><div class="lp-name">${esc(p.name)}</div>${tm}${p.idle?'<span class="lp-idle">IDLE</span>':''}${isMe?'<span class="lp-you">YOU</span>':''}</div>`;
+    const tm=p.team&&teamMap.has(p.team)?'<span class="lp-team-badge" style="background:'+teamMap.get(p.team).color+'22;color:'+teamMap.get(p.team).color+'">'+esc(teamMap.get(p.team).name)+'</span>':'';
+    const idle=p.idle?'<span class="lp-idle">IDLE</span>':'';
+    const you=isMe?'<span class="lp-you">YOU</span>':'';
+    return '<div class="lp" style="opacity:'+(p.idle?.4:1)+'"><div class="lp-dot" style="background:'+p.color+'"></div><div class="lp-name">'+esc(p.name)+'</div>'+tm+idle+you+'</div>';
   }).join('');
+  document.getElementById('lobbyList').innerHTML=html;
 
+  const myT=myTeam;
   let thtml=teamsData.map(t=>{
-    const active=myTeam===t.id,dis=teamsLocked&&!active?'disabled':'';
-    return `<button class="team-join-btn ${active?'active':''}" onclick="${active?'leaveMyTeam()':'joinT(\''+t.id+'\')'}" ${dis}><div class="tdot" style="background:${t.color}"></div>${esc(t.name)}${active?' ✓':''}</button>`;
+    const active=myT===t.id;
+    return '<button class="team-join-btn '+(active?'active':'')+'" onclick="'+(active?'leaveMyTeam()':'joinT(\''+t.id+'\')')+'" '+(teamsLocked&&!active?'disabled':'')+' aria-label="'+(active?'Leave':'Join')+' team '+esc(t.name)+'"><div class="tdot" style="background:'+t.color+'"></div>'+esc(t.name)+(active?' ✓':'')+'</button>';
   }).join('');
-  if(myTeam&&myTeam!=='pending')thtml+=`<button class="leave-btn" onclick="leaveMyTeam()" ${teamsLocked?'disabled':''}>Leave</button>`;
+  if(myT&&!teamsLocked)thtml+='<button class="leave-btn" onclick="leaveMyTeam()" aria-label="Leave current team">Leave team</button>';
   document.getElementById('teamBtns').innerHTML=thtml||'<span style="font-size:13px;color:var(--dim)">No teams yet</span>';
-
-  const lm=document.getElementById('lockMsg');
-  if(teamsLocked){lm.innerHTML='<div class="locked-msg">🔒 Teams locked by host</div>';document.getElementById('ctRow').style.display='none';}
-  else{lm.innerHTML='';document.getElementById('ctRow').style.display=teamsData.length>=4?'none':'flex';}
+  document.getElementById('ctRow').style.display=(teamsLocked||teamsData.length>=4)?'none':'flex';
   updateTeamDisplay();
+
+  // Update myTeam from lobby data
+  if(player&&player.myId){
+    const me=playersData.find(p=>p.id===player.myId);
+    if(me&&me.team)myTeam=me.team;
+  }
 }
 
 function toggleLobby(){
   lobbyOpen=!lobbyOpen;
   document.getElementById('lobbyPanel').classList.toggle('open',lobbyOpen);
-  document.getElementById('lobbyToggle').textContent=(lobbyOpen?'▲':'▼')+` Lobby (${playersData.length} players)`;
+  document.getElementById('lobbyToggle').setAttribute('aria-expanded',lobbyOpen);
+  const toggle=document.getElementById('lobbyToggle');
+  toggle.textContent=(lobbyOpen?'▲':'▼')+' Lobby ('+playersData.length+' players)';
 }
+
 function joinT(tid){if(teamsLocked)return;player.joinTeam(tid);myTeam=tid;renderLobby();}
 function leaveMyTeam(){if(teamsLocked)return;player.leaveTeam();myTeam=null;renderLobby();}
 function createTeam(){
   if(teamsLocked||teamsData.length>=4)return;
-  const n=document.getElementById('ctName').value.trim();if(!n)return;
-  player.createTeam(n,selColorIdx);document.getElementById('ctName').value='';myTeam='pending';
+  const name=document.getElementById('ctName').value.trim();
+  if(!name)return;
+  player.createTeam(name,selColorIdx);
+  document.getElementById('ctName').value='';
+  myTeam='pending';
 }
+
 function updateTeamDisplay(){
   const el=document.getElementById('pTeam');
-  if(myTeam&&myTeam!=='pending'){const t=teamsData.find(t=>t.id===myTeam);if(t){el.textContent=t.name;el.style.color=t.color;}else el.textContent='';}
-  else el.textContent='';
+  if(myTeam&&myTeam!=='pending'){
+    const t=teamsData.find(t=>t.id===myTeam);
+    if(t){el.textContent=t.name;el.style.color=t.color;}
+    else el.textContent='';
+  } else el.textContent='';
 }
 
-/* ══ Buzzer states ══ */
-function clearPenalty(){if(penaltyTimer){clearInterval(penaltyTimer);penaltyTimer=null;}penaltyActive=false;}
-
 function setIdle(){
-  state='idle';clearPenalty();
-  const b=document.getElementById('buzzBtn');b.className='bbtn wait';b.disabled=true;
+  state='idle';
+  if(penaltyTimer){clearInterval(penaltyTimer);penaltyTimer=null;}
+  const b=document.getElementById('buzzBtn');
+  b.className='bbtn wait';b.disabled=true;
   b.querySelector('.bt').textContent='WAIT';
-  b.style.background='radial-gradient(circle at 35% 35%,#333,#222,#181818)';b.style.boxShadow='none';
-  document.getElementById('stTxt').textContent='Waiting for host…';document.getElementById('stTxt').style.color='var(--dim)';
+  b.style.background='radial-gradient(circle at 35% 35%,#333,#222,#181818)';
+  b.style.boxShadow='none';
+  b.setAttribute('aria-label','Buzz button — waiting for round to start');
+  document.getElementById('stTxt').textContent='Waiting for host…';
+  document.getElementById('stTxt').style.color='var(--dim)';
   document.getElementById('resArea').innerHTML='';
 }
 
 function setArmed(){
+  if(penaltyTimer)return;
   state='armed';
-  if(penaltyActive)return; // penalty timer will re-call setArmed when done
-  const b=document.getElementById('buzzBtn');b.className='bbtn armed';b.disabled=false;
+  const b=document.getElementById('buzzBtn');
+  b.className='bbtn armed';b.disabled=false;
   b.querySelector('.bt').textContent='BUZZ!';
-  b.style.background=`radial-gradient(circle at 35% 35%,${lighten(myColor,30)},${myColor},${darken(myColor,40)})`;
-  b.style.boxShadow=`0 0 45px ${myColor}45, inset 0 2px 18px rgba(255,255,255,.07)`;
-  document.getElementById('stTxt').textContent='GO!';document.getElementById('stTxt').style.color=myColor;
-  document.getElementById('resArea').innerHTML='';hapticBuzz(30);playSound('arm');
+  b.style.background='radial-gradient(circle at 35% 35%,'+lighten(myColor,30)+','+myColor+','+darken(myColor,40)+')';
+  b.style.boxShadow='0 0 45px '+myColor+'45, inset 0 2px 18px rgba(255,255,255,.07)';
+  b.setAttribute('aria-label','Buzz now!');
+  document.getElementById('stTxt').textContent='GO!';
+  document.getElementById('stTxt').style.color=myColor;
+  document.getElementById('resArea').innerHTML='';
+  hapticBuzz(30);playSound('arm');
 }
 
 function setBuzzed(order,gap){
-  state='buzzed';const b=document.getElementById('buzzBtn');b.className='bbtn done';b.disabled=true;
-  b.querySelector('.bt').textContent=`#${order}`;
-  if(order===1){document.getElementById('stTxt').textContent='🏆 FIRST!';document.getElementById('stTxt').style.color=myColor;document.getElementById('resArea').innerHTML=`<div class="res-ord" style="color:${myColor};text-shadow:0 0 16px ${myColor}">🏆 #1</div>`;}
-  else{document.getElementById('stTxt').textContent=`#${order}`;document.getElementById('stTxt').style.color='var(--dim)';document.getElementById('resArea').innerHTML=`<div class="res-ord" style="color:${myColor}">#${order}</div><div class="res-gap">+${gap}ms behind</div>`;}
+  state='buzzed';
+  const b=document.getElementById('buzzBtn');
+  b.className='bbtn done';b.disabled=true;
+  b.querySelector('.bt').textContent='#'+order;
+  b.setAttribute('aria-label','You buzzed — position '+order);
+  if(order===1){
+    document.getElementById('stTxt').textContent='🏆 FIRST!';
+    document.getElementById('stTxt').style.color=myColor;
+    document.getElementById('resArea').innerHTML='<div class="res-ord" style="color:'+myColor+';text-shadow:0 0 16px '+myColor+'">🏆 #1</div>';
+  } else {
+    document.getElementById('stTxt').textContent='#'+order;
+    document.getElementById('stTxt').style.color='var(--dim)';
+    document.getElementById('resArea').innerHTML='<div class="res-ord" style="color:'+myColor+'">#'+order+'</div><div class="res-gap">+'+gap+'ms behind</div>';
+  }
 }
 
-function setLocked(firstName,firstColor){
-  if(state!=='armed')return;state='locked';
-  const b=document.getElementById('buzzBtn');b.className='bbtn done';b.disabled=true;b.querySelector('.bt').textContent='✕';
-  b.style.background='radial-gradient(circle at 35% 35%,#333,#222,#181818)';b.style.boxShadow='none';
-  document.getElementById('stTxt').textContent='LOCKED OUT';document.getElementById('stTxt').style.color='var(--pink)';
-  document.getElementById('resArea').innerHTML=`<div style="color:${firstColor};font-family:'Orbitron',monospace;font-weight:700;font-size:clamp(14px,4vw,18px)">${esc(firstName)} was first</div>`;
+function setLocked(firstName,firstColor,firstTeam){
+  if(state!=='armed')return;
+  state='locked';
+  const b=document.getElementById('buzzBtn');
+  b.className='bbtn done';b.disabled=true;
+  b.querySelector('.bt').textContent='✕';
+  b.style.background='radial-gradient(circle at 35% 35%,#333,#222,#181818)';
+  b.style.boxShadow='none';
+  b.setAttribute('aria-label','Locked out — '+firstName+' was first');
+  document.getElementById('stTxt').textContent='LOCKED OUT';
+  document.getElementById('stTxt').style.color='var(--pink)';
+  const teamInfo=firstTeam&&teamsData.find(t=>t.id===firstTeam);
+  const teamStr=teamInfo?' <span style="font-size:.75em;color:'+teamInfo.color+'">'+esc(teamInfo.name)+'</span>':'';
+  document.getElementById('resArea').innerHTML='<div class="res-who" style="color:'+firstColor+'">'+esc(firstName)+' was first'+teamStr+'</div>';
 }
 
-function startPenalty(seconds){
-  playSound('penalty');hapticBuzz(200);penaltyActive=true;
-  const b=document.getElementById('buzzBtn');b.className='bbtn penalty';b.disabled=true;
+function setPenalty(seconds){
+  playSound('penalty');hapticBuzz(200);
+  const b=document.getElementById('buzzBtn');
+  b.className='bbtn penalty';b.disabled=true;
   b.querySelector('.bt').textContent='⚠';
-  b.style.background='radial-gradient(circle at 35% 35%,#553300,#332200,#221100)';b.style.boxShadow='0 0 30px #FFD60030';
-  document.getElementById('stTxt').textContent='PENALTY';document.getElementById('stTxt').style.color='var(--orange)';
-  let rem=seconds;document.getElementById('resArea').innerHTML=`<div class="res-pen" id="penCd">${rem}s</div>`;
+  b.style.background='radial-gradient(circle at 35% 35%,#553300,#332200,#221100)';
+  b.style.boxShadow='0 0 30px rgba(255,145,0,.15)';
+  b.setAttribute('aria-label','Penalty — '+seconds+' seconds remaining');
+  document.getElementById('stTxt').textContent='PENALTY';
+  document.getElementById('stTxt').style.color='var(--orange)';
+  let rem=seconds;
+  document.getElementById('resArea').innerHTML='<div class="res-pen" id="penCd">'+rem+'s</div>';
   if(penaltyTimer)clearInterval(penaltyTimer);
   penaltyTimer=setInterval(()=>{
-    rem--;const el=document.getElementById('penCd');if(el)el.textContent=rem+'s';
-    if(rem<=0){clearInterval(penaltyTimer);penaltyTimer=null;penaltyActive=false;
-      if(state==='armed')setArmed();else setIdle();
-    }
+    rem--;
+    const el=document.getElementById('penCd');
+    if(el)el.textContent=rem+'s';
+    if(rem<=0){clearInterval(penaltyTimer);penaltyTimer=null;setArmed();}
   },1000);
   state='armed';
 }
 
-function doBuzz(){if(!player||penaltyActive)return;if(lobbyOpen)toggleLobby();player.buzz();}
+function doBuzz(){
+  if(!player)return;
+  if(lobbyOpen)toggleLobby();
+  player.buzz();
+}
 
 function showOverlay(msg,sub){
-  const o=document.createElement('div');o.className='overlay';
-  o.innerHTML=`<div class="logo" style="font-size:22px">BUZZER</div><div class="overlay-t">${msg}</div>${sub?'<div class="overlay-sub">'+sub+'</div>':''}`;
+  const o=document.createElement('div');o.className='overlay';o.setAttribute('role','alert');
+  o.innerHTML='<div class="hbar-logo">BUZZER</div><div class="overlay-t">'+msg+'</div>'+(sub?'<div class="overlay-sub">'+sub+'</div>':'');
   document.body.appendChild(o);
 }
 
-document.getElementById('inpName').addEventListener('keyup',e=>{if(e.key==='Enter')document.getElementById('inpCode').focus()});
-document.getElementById('inpCode').addEventListener('keyup',e=>{if(e.key==='Enter')doJoin()});
-document.getElementById('ctName').addEventListener('keyup',e=>{if(e.key==='Enter')createTeam()});
+document.getElementById('inpName').addEventListener('keyup',e=>{if(e.key==='Enter')document.getElementById('inpCode').focus();});
+document.getElementById('ctName').addEventListener('keyup',e=>{if(e.key==='Enter')createTeam();});
 document.getElementById('inpName').focus();
 </script>
 </body>
