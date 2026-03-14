@@ -9,32 +9,33 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="buzzer.js"></script>
+<script src="themes.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#06060C;--s1:#0E0E18;--s2:#161624;--bdr:#222236;--txt:#E0E0F0;--dim:#8888A0;--cyan:#00E5FF;--pink:#FF3E6C;--green:#76FF03;--yellow:#FFD600;--orange:#FF9100}
+:root{--t-bg:#06060C;--t-s1:#0E0E18;--t-s2:#161624;--t-bdr:#222236;--t-txt:#E0E0F0;--t-dim:#8888A0;--t-primary:#00E5FF;--t-secondary:#FF3E6C;--t-green:#76FF03;--t-yellow:#FFD600;--t-orange:#FF9100;--t-btn-start-bg:linear-gradient(135deg,#00E5FF,#00B4D8);--t-btn-start-c:#06060C;--t-btn-reset-bg:linear-gradient(135deg,#FF3E6C,#D81B60);--t-btn-reset-c:#ffffff;--t-card-bg:#0E0E18;--t-card-bdr:#222236;--t-input-bg:#06060C;--t-buzz-glow:1;--t-logo-grad:linear-gradient(135deg,#00E5FF,#FF3E6C);--t-lock-color:#76FF03;--t-lock-bg:rgba(118,255,3,0.05);--t-lock-bdr:rgba(118,255,3,0.3);--t-penalty-color:#FF9100;--t-penalty-bg:rgba(255,145,0,0.06);--t-penalty-bdr:rgba(255,145,0,0.25);--t-mode:dark}
 html,body{height:100%;overflow:hidden;touch-action:manipulation}
-body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--txt)}
+body{font-family:'Rajdhani',sans-serif;background:var(--t-bg);color:var(--t-txt)}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(0,229,255,.05) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(255,62,108,.03) 0%,transparent 50%);pointer-events:none}
 main{position:relative;z-index:1;width:100%;max-width:480px;padding:12px;margin:0 auto;height:100%;display:flex;flex-direction:column}
 .scr{display:none;width:100%;flex:1}.scr.on{display:flex;flex-direction:column}
 
 /* Header */
-.hbar{display:flex;align-items:center;padding:6px 10px;background:var(--s1);border-radius:10px;gap:6px;flex-shrink:0}
-.back-btn{width:30px;height:30px;background:var(--s2);border:1px solid var(--bdr);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;color:var(--dim);text-decoration:none;transition:all .2s;flex-shrink:0}
-.back-btn:hover,.back-btn:focus-visible{border-color:var(--cyan);color:var(--cyan);outline:none}
-.hbar-logo{font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:3px;padding-right:3px;background:linear-gradient(135deg,var(--cyan),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hbar{display:flex;align-items:center;padding:6px 10px;background:var(--t-s1);border-radius:10px;gap:6px;flex-shrink:0}
+.back-btn{width:30px;height:30px;background:var(--t-s2);border:1px solid var(--t-bdr);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;color:var(--t-dim);text-decoration:none;transition:all .2s;flex-shrink:0}
+.back-btn:hover,.back-btn:focus-visible{border-color:var(--t-primary);color:var(--t-primary);outline:none}
+.hbar-logo{font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:3px;padding-right:3px;background:linear-gradient(135deg,var(--t-primary),var(--t-secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
 /* Join form */
-.jcard{background:var(--s1);border:1px solid var(--bdr);border-radius:16px;padding:28px 22px;margin:auto 0}
-.flbl{font-size:14px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:6px;font-weight:600}
-.inp{width:100%;padding:16px;font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:600;background:var(--bg);border:1px solid var(--bdr);border-radius:12px;color:var(--txt);outline:none;transition:border-color .2s;margin-bottom:14px}
-.inp:focus{border-color:var(--cyan)}
+.jcard{background:var(--t-s1);border:1px solid var(--t-bdr);border-radius:16px;padding:28px 22px;margin:auto 0}
+.flbl{font-size:14px;letter-spacing:3px;color:var(--t-dim);text-transform:uppercase;margin-bottom:6px;font-weight:600}
+.inp{width:100%;padding:16px;font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:600;background:var(--t-bg);border:1px solid var(--t-bdr);border-radius:12px;color:var(--t-txt);outline:none;transition:border-color .2s;margin-bottom:14px}
+.inp:focus{border-color:var(--t-primary)}
 .inp::placeholder{color:#555;font-weight:400}
 .inp-code{font-family:'Orbitron',monospace;font-size:28px;font-weight:700;text-align:center;letter-spacing:10px;text-transform:uppercase}
-.btn-join{width:100%;font-family:'Orbitron',monospace;font-size:18px;font-weight:700;letter-spacing:3px;padding:18px;border:2px solid var(--cyan);background:transparent;color:var(--cyan);border-radius:14px;cursor:pointer;transition:all .3s;text-transform:uppercase}
-.btn-join:hover,.btn-join:active,.btn-join:focus-visible{background:var(--cyan);color:var(--bg);outline:none}
+.btn-join{width:100%;font-family:'Orbitron',monospace;font-size:18px;font-weight:700;letter-spacing:3px;padding:18px;border:2px solid var(--t-primary);background:transparent;color:var(--t-primary);border-radius:14px;cursor:pointer;transition:all .3s;text-transform:uppercase}
+.btn-join:hover,.btn-join:active,.btn-join:focus-visible{background:var(--t-primary);color:var(--t-bg);outline:none}
 .btn-join:disabled{opacity:.4;cursor:wait}
-.err{color:var(--pink);font-size:14px;text-align:center;margin-top:8px;min-height:20px}
+.err{color:var(--t-secondary);font-size:14px;text-align:center;margin-top:8px;min-height:20px}
 
 /* Buzzer screen */
 .bscr{justify-content:space-between}
@@ -46,37 +47,37 @@ main{position:relative;z-index:1;width:100%;max-width:480px;padding:12px;margin:
 .status{font-size:clamp(16px,4.5vw,22px);letter-spacing:3px;text-transform:uppercase;margin-top:4px;min-height:26px;font-weight:700}
 
 /* Lobby toggle */
-.lobby-toggle{width:100%;padding:10px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;color:var(--dim);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .2s;flex-shrink:0;margin-top:6px}
-.lobby-toggle:hover,.lobby-toggle:focus-visible{border-color:var(--cyan);color:var(--cyan);outline:none}
-.lobby-panel{display:none;background:var(--s1);border:1px solid var(--bdr);border-radius:0 0 10px 10px;border-top:none;padding:12px;flex-shrink:0;max-height:40vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.lobby-toggle{width:100%;padding:10px;background:var(--t-s1);border:1px solid var(--t-bdr);border-radius:10px;color:var(--t-dim);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .2s;flex-shrink:0;margin-top:6px}
+.lobby-toggle:hover,.lobby-toggle:focus-visible{border-color:var(--t-primary);color:var(--t-primary);outline:none}
+.lobby-panel{display:none;background:var(--t-s1);border:1px solid var(--t-bdr);border-radius:0 0 10px 10px;border-top:none;padding:12px;flex-shrink:0;max-height:40vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .lobby-panel.open{display:block}
 
 .lp{display:flex;align-items:center;gap:8px;padding:6px;font-size:14px;border-radius:6px}
 .lp-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .lp-name{flex:1;font-weight:600}
 .lp-team-badge{font-size:11px;padding:2px 7px;border-radius:8px;font-weight:600}
-.lp-idle{font-size:11px;color:var(--orange);font-family:'Orbitron',monospace}
-.lp-you{font-size:11px;color:var(--cyan);font-family:'Orbitron',monospace;font-weight:700}
+.lp-idle{font-size:11px;color:var(--t-orange);font-family:'Orbitron',monospace}
+.lp-you{font-size:11px;color:var(--t-primary);font-family:'Orbitron',monospace;font-weight:700}
 
 /* Team controls in lobby */
-.team-section{margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr)}
-.team-hd{font-size:13px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:8px}
+.team-section{margin-top:10px;padding-top:10px;border-top:1px solid var(--t-bdr)}
+.team-hd{font-size:13px;letter-spacing:2px;color:var(--t-dim);text-transform:uppercase;margin-bottom:8px}
 .team-btns{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
-.team-join-btn{font-size:15px;padding:8px 14px;border-radius:10px;border:1px solid var(--bdr);background:var(--s2);color:var(--txt);cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:6px}
-.team-join-btn:hover,.team-join-btn:focus-visible{border-color:var(--cyan);outline:none}
-.team-join-btn.active{border-color:var(--green);color:var(--green)}
+.team-join-btn{font-size:15px;padding:8px 14px;border-radius:10px;border:1px solid var(--t-bdr);background:var(--t-s2);color:var(--t-txt);cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:6px}
+.team-join-btn:hover,.team-join-btn:focus-visible{border-color:var(--t-primary);outline:none}
+.team-join-btn.active{border-color:var(--t-green);color:var(--t-green)}
 .team-join-btn .tdot{width:9px;height:9px;border-radius:50%}
-.leave-btn{font-size:13px;padding:6px 12px;border:1px solid var(--bdr);background:transparent;color:var(--dim);border-radius:8px;cursor:pointer}
-.leave-btn:hover,.leave-btn:focus-visible{border-color:var(--pink);color:var(--pink);outline:none}
+.leave-btn{font-size:13px;padding:6px 12px;border:1px solid var(--t-bdr);background:transparent;color:var(--t-dim);border-radius:8px;cursor:pointer}
+.leave-btn:hover,.leave-btn:focus-visible{border-color:var(--t-secondary);color:var(--t-secondary);outline:none}
 .ct-row{display:flex;gap:6px;margin-top:8px;align-items:center}
-.ct-inp{flex:1;padding:10px 12px;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;background:var(--bg);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);outline:none}
-.ct-inp:focus{border-color:var(--cyan)}
+.ct-inp{flex:1;padding:10px 12px;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;background:var(--t-bg);border:1px solid var(--t-bdr);border-radius:8px;color:var(--t-txt);outline:none}
+.ct-inp:focus{border-color:var(--t-primary)}
 .ct-colors{display:flex;gap:5px;align-items:center}
 .ct-color{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all .15s}
 .ct-color:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .ct-color.sel{border-color:#fff;transform:scale(1.15)}
-.ct-go{font-size:14px;padding:8px 14px;border:1px solid var(--cyan);background:transparent;color:var(--cyan);border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;transition:all .2s}
-.ct-go:hover,.ct-go:focus-visible{background:var(--cyan);color:var(--bg);outline:none}
+.ct-go{font-size:14px;padding:8px 14px;border:1px solid var(--t-primary);background:transparent;color:var(--t-primary);border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;transition:all .2s}
+.ct-go:hover,.ct-go:focus-visible{background:var(--t-primary);color:var(--t-bg);outline:none}
 
 /* The buzzer */
 .bwrap{display:flex;align-items:center;justify-content:center;flex:1;min-height:0}
@@ -87,7 +88,7 @@ main{position:relative;z-index:1;width:100%;max-width:480px;padding:12px;margin:
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
 .bbtn:focus-visible{outline:3px solid #fff;outline-offset:4px}
-.bbtn .bt{font-family:'Orbitron',monospace;font-size:clamp(24px,7vw,32px);font-weight:900;letter-spacing:4px;color:var(--bg);position:relative;z-index:2;text-transform:uppercase;pointer-events:none}
+.bbtn .bt{font-family:'Orbitron',monospace;font-size:clamp(24px,7vw,32px);font-weight:900;letter-spacing:4px;color:var(--t-bg);position:relative;z-index:2;text-transform:uppercase;pointer-events:none}
 .bbtn::after{content:'';position:absolute;inset:4px;border-radius:50%;border:3px solid rgba(255,255,255,.1);pointer-events:none}
 .bbtn.wait{opacity:.12;transform:scale(.85);pointer-events:none}
 .bbtn.wait .bt{font-size:clamp(13px,3.5vw,16px);letter-spacing:2px}
@@ -100,15 +101,15 @@ main{position:relative;z-index:1;width:100%;max-width:480px;padding:12px;margin:
 
 .res{text-align:center;min-height:60px;flex-shrink:0;padding-bottom:8px}
 .res-ord{font-family:'Orbitron',monospace;font-size:clamp(38px,10vw,52px);font-weight:900}
-.res-gap{font-size:15px;color:var(--dim);letter-spacing:2px;margin-top:2px}
-.res-pen{font-family:'Orbitron',monospace;font-size:clamp(20px,6vw,28px);font-weight:700;color:var(--orange)}
+.res-gap{font-size:15px;color:var(--t-dim);letter-spacing:2px;margin-top:2px}
+.res-pen{font-family:'Orbitron',monospace;font-size:clamp(20px,6vw,28px);font-weight:700;color:var(--t-orange)}
 .res-who{font-family:'Orbitron',monospace;font-weight:700;font-size:clamp(15px,4vw,20px)}
 
 /* Overlay */
-.overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999}
+.overlay{position:fixed;inset:0;background:var(--t-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999}
 .overlay .hbar-logo{font-size:20px;margin-bottom:16px}
-.overlay-t{font-size:18px;color:var(--pink);letter-spacing:2px}
-.overlay-sub{font-size:14px;color:var(--dim);margin-top:10px}
+.overlay-t{font-size:18px;color:var(--t-secondary);letter-spacing:2px}
+.overlay-sub{font-size:14px;color:var(--t-dim);margin-top:10px}
 </style>
 </head>
 <body>
@@ -117,7 +118,8 @@ main{position:relative;z-index:1;width:100%;max-width:480px;padding:12px;margin:
   <header>
     <div class="hbar">
       <a href="index.html" class="back-btn" aria-label="Back to home">←</a>
-      <div class="hbar-logo">BUZZER</div>
+      <div class="hbar-logo" id="stdLogo">BUZZER</div>
+      <img id="aldewaniahLogo" src="aldewaniah-logo.png" alt="الديوانية" style="display:none;height:28px;object-fit:contain">
     </div>
   </header>
 
@@ -195,6 +197,7 @@ function doJoin(){
     if(info.teams)teamsData=info.teams;
     if(info.teamsLocked!=null)teamsLocked=info.teamsLocked;
     if(info.rejoined&&info.team)myTeam=info.team;
+    if(info.theme)applyTheme(info.theme);
     showBuzzer(info.name,info.color);
   }).catch(e=>{
     document.getElementById('errMsg').textContent=e.message||'Failed to join';
@@ -228,6 +231,7 @@ function onPlayerUpdate(msg){
       renderLobby();break;
     case'teams_locked':teamsLocked=true;renderLobby();break;
     case'teams_unlocked':teamsLocked=false;renderLobby();break;
+    case'theme_change':if(msg.theme)applyTheme(msg.theme);break;
     case'kicked':showOverlay('You were removed from the room');break;
     case'disconnected':showOverlay('Disconnected from host','Refresh to reconnect');break;
     case'error':if(state==='idle')document.getElementById('errMsg').textContent=msg.message;break;
@@ -254,7 +258,7 @@ function renderLobby(){
     return '<button class="team-join-btn '+(active?'active':'')+'" onclick="'+(active?'leaveMyTeam()':'joinT(\''+t.id+'\')')+'" '+(teamsLocked&&!active?'disabled':'')+' aria-label="'+(active?'Leave':'Join')+' team '+esc(t.name)+'"><div class="tdot" style="background:'+t.color+'"></div>'+esc(t.name)+(active?' ✓':'')+'</button>';
   }).join('');
   if(myT&&!teamsLocked)thtml+='<button class="leave-btn" onclick="leaveMyTeam()" aria-label="Leave current team">Leave team</button>';
-  document.getElementById('teamBtns').innerHTML=thtml||'<span style="font-size:13px;color:var(--dim)">No teams yet</span>';
+  document.getElementById('teamBtns').innerHTML=thtml||'<span style="font-size:13px;color:var(--t-dim)">No teams yet</span>';
   document.getElementById('ctRow').style.display=(teamsLocked||teamsData.length>=4)?'none':'flex';
   updateTeamDisplay();
 
@@ -303,7 +307,7 @@ function setIdle(){
   b.style.boxShadow='none';
   b.setAttribute('aria-label','Buzz button — waiting for round to start');
   document.getElementById('stTxt').textContent='Waiting for host…';
-  document.getElementById('stTxt').style.color='var(--dim)';
+  document.getElementById('stTxt').style.color='var(--t-dim)';
   document.getElementById('resArea').innerHTML='';
 }
 
@@ -334,7 +338,7 @@ function setBuzzed(order,gap){
     document.getElementById('resArea').innerHTML='<div class="res-ord" style="color:'+myColor+';text-shadow:0 0 16px '+myColor+'">🏆 #1</div>';
   } else {
     document.getElementById('stTxt').textContent='#'+order;
-    document.getElementById('stTxt').style.color='var(--dim)';
+    document.getElementById('stTxt').style.color='var(--t-dim)';
     document.getElementById('resArea').innerHTML='<div class="res-ord" style="color:'+myColor+'">#'+order+'</div><div class="res-gap">+'+gap+'ms behind</div>';
   }
 }
@@ -349,7 +353,7 @@ function setLocked(firstName,firstColor,firstTeam){
   b.style.boxShadow='none';
   b.setAttribute('aria-label','Locked out — '+firstName+' was first');
   document.getElementById('stTxt').textContent='LOCKED OUT';
-  document.getElementById('stTxt').style.color='var(--pink)';
+  document.getElementById('stTxt').style.color='var(--t-secondary)';
   const teamInfo=firstTeam&&teamsData.find(t=>t.id===firstTeam);
   const teamStr=teamInfo?' <span style="font-size:.75em;color:'+teamInfo.color+'">'+esc(teamInfo.name)+'</span>':'';
   document.getElementById('resArea').innerHTML='<div class="res-who" style="color:'+firstColor+'">'+esc(firstName)+' was first'+teamStr+'</div>';
@@ -364,7 +368,7 @@ function setPenalty(seconds){
   b.style.boxShadow='0 0 30px rgba(255,145,0,.15)';
   b.setAttribute('aria-label','Penalty — '+seconds+' seconds remaining');
   document.getElementById('stTxt').textContent='PENALTY';
-  document.getElementById('stTxt').style.color='var(--orange)';
+  document.getElementById('stTxt').style.color='var(--t-orange)';
   let rem=seconds;
   document.getElementById('resArea').innerHTML='<div class="res-pen" id="penCd">'+rem+'s</div>';
   if(penaltyTimer)clearInterval(penaltyTimer);

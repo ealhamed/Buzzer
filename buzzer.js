@@ -56,7 +56,7 @@ class BuzzerHost {
     this.onUpdate=onUpdate; this.peer=null; this.conns=new Map(); this.players=new Map();
     this.teams=new Map(); this.buzzes=[]; this.armed=false; this.locked=false;
     this.timerDuration=3; this.colorIdx=0; this.roomCode=''; this.pidCounter=0;
-    this.teamsLocked=false; this._hbInterval=null; this.reconnectTokens=new Map();
+    this.teamsLocked=false; this._hbInterval=null; this.reconnectTokens=new Map(); this.theme='neon';
   }
   create(){
     return new Promise((resolve,reject)=>{
@@ -94,7 +94,7 @@ class BuzzerHost {
     const token=Math.random().toString(36).substring(2,14);this.reconnectTokens.set(token,id);
     this.players.set(id,{name:msg.name||'Player',color,connPeer:conn.peer,team:null,lastSeen:Date.now(),idle:false,penaltyUntil:0});
     this.conns.set(conn.peer,{conn,playerId:id});
-    conn.send({type:'joined',id,color,name:msg.name||'Player',token,teams:this._tp(),teamsLocked:this.teamsLocked});
+    conn.send({type:'joined',id,color,name:msg.name||'Player',token,teams:this._tp(),teamsLocked:this.teamsLocked,theme:this.theme});
     if(this.armed&&!this.locked)conn.send({type:'round_armed',timerDuration:this.timerDuration});
     this._broadcastLobby();
   }
@@ -105,7 +105,7 @@ class BuzzerHost {
     if(p.connPeer&&this.conns.has(p.connPeer))this.conns.delete(p.connPeer);
     p.connPeer=conn.peer;p.lastSeen=Date.now();p.idle=false;
     this.conns.set(conn.peer,{conn,playerId:pid});
-    conn.send({type:'rejoined',id:pid,color:p.color,name:p.name,team:p.team,token:msg.token,teams:this._tp(),teamsLocked:this.teamsLocked});
+    conn.send({type:'rejoined',id:pid,color:p.color,name:p.name,team:p.team,token:msg.token,teams:this._tp(),teamsLocked:this.teamsLocked,theme:this.theme});
     if(this.armed&&!this.locked)conn.send({type:'round_armed',timerDuration:this.timerDuration});
     else if(this.armed&&this.locked&&this.buzzes.length>0)conn.send({type:'first_buzz',id:this.buzzes[0].id,name:this.buzzes[0].name,color:this.buzzes[0].color,team:this.buzzes[0].team,timerDuration:this.timerDuration});
     this._broadcastLobby();
@@ -155,6 +155,7 @@ class BuzzerHost {
   }
   lockTeams(){this.teamsLocked=true;this._broadcast({type:'teams_locked'});this._broadcastLobby();}
   unlockTeams(){this.teamsLocked=false;this._broadcast({type:'teams_unlocked'});this._broadcastLobby();}
+  setTheme(themeId){this.theme=themeId;this._broadcast({type:'theme_change',theme:themeId});}
   _tp(){const o=[];for(const[id,t]of this.teams)o.push({id,name:t.name,color:t.color});return o;}
   _broadcastLobby(){const ps=[];for(const[id,p]of this.players)ps.push({id,name:p.name,color:p.color,team:p.team,idle:p.idle,penalized:p.penaltyUntil>Date.now()});this._broadcast({type:'lobby',players:ps,teams:this._tp(),teamsLocked:this.teamsLocked});}
   _broadcast(msg){for(const[,c]of this.conns)try{c.conn.send(msg);}catch(e){}this.onUpdate(msg);}

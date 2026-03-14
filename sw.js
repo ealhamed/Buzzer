@@ -1,10 +1,12 @@
-const CACHE = 'buzzer-v3';
+const CACHE = 'buzzer-v3b';
 const ASSETS = [
   './',
   './index.html',
   './host.html',
   './join.html',
   './buzzer.js',
+  './themes.js',
+  './aldewaniah-logo.png',
   './manifest.json'
 ];
 
