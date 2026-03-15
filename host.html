@@ -43,13 +43,16 @@ main{position:relative;z-index:1;padding:10px;max-width:520px;margin:0 auto;padd
 .setup-msg{font-family:'Orbitron',monospace;font-size:14px;color:var(--t-primary);letter-spacing:3px}
 .setup-err{color:var(--t-secondary);font-size:14px;margin-top:10px}
 
-/* Buzz hero */
-.buzz-hero{background:var(--t-s1);border:2px solid var(--t-bdr);border-radius:14px;padding:20px 14px;text-align:center;margin-top:8px;transition:border-color .3s}
-.bz-label{font-size:11px;letter-spacing:4px;color:var(--t-dim);text-transform:uppercase}
-.bz-team{font-size:13px;margin-top:3px;font-weight:600}
-.bz-name{font-family:'Orbitron',monospace;font-size:clamp(24px,7vw,32px);font-weight:900;letter-spacing:2px;margin:4px 0}
-.bz-timer{font-family:'Orbitron',monospace;font-size:clamp(40px,11vw,54px);font-weight:900;line-height:1}
-.bz-sub{font-size:11px;letter-spacing:2px;color:var(--t-dim);text-transform:uppercase;margin-top:3px}
+/* Buzz hero — fixed layout */
+.buzz-hero{background:var(--t-card-bg);border:2px solid var(--t-card-bdr);border-radius:14px;padding:20px 14px;text-align:center;margin-top:8px;transition:border-color .3s;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:default;position:relative}
+.buzz-hero.tappable{cursor:pointer}
+.buzz-hero.tappable::after{content:'Tap to start next round';position:absolute;bottom:10px;font-size:12px;color:var(--t-dim);letter-spacing:1px;animation:tapPulse 1.5s ease-in-out infinite}
+@keyframes tapPulse{0%,100%{opacity:.4}50%{opacity:1}}
+.bz-label{font-size:11px;letter-spacing:4px;color:var(--t-dim);text-transform:uppercase;min-height:18px}
+.bz-team{font-size:13px;font-weight:600;min-height:20px;transition:color .2s}
+.bz-name{font-family:'Orbitron',monospace;font-size:clamp(24px,7vw,32px);font-weight:900;letter-spacing:2px;min-height:40px;display:flex;align-items:center;justify-content:center;transition:color .2s}
+.bz-timer{font-family:'Orbitron',monospace;font-size:clamp(40px,11vw,54px);font-weight:900;line-height:1;min-height:56px;display:flex;align-items:center;justify-content:center;transition:color .2s,opacity .2s}
+.bz-sub{font-size:11px;letter-spacing:2px;color:var(--t-dim);text-transform:uppercase;min-height:18px}
 .bz-more{width:100%;padding:8px;margin-top:10px;background:var(--t-s2);border:1px solid var(--t-bdr);border-radius:8px;color:var(--t-dim);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .2s}
 .bz-more:hover{border-color:var(--t-primary);color:var(--t-primary)}
 .bz-list{display:none;margin-top:8px;flex-direction:column;gap:4px}.bz-list.open{display:flex}
@@ -58,10 +61,7 @@ main{position:relative;z-index:1;padding:10px;max-width:520px;margin:0 auto;padd
 .bz-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .bz-gap{font-family:'Orbitron',monospace;font-size:11px;color:var(--t-dim);margin-left:auto}
 
-/* Idle/waiting states */
-.idle-msg{text-align:center;color:var(--t-dim);font-size:14px;padding:16px;letter-spacing:1px}
-.wait-badge{text-align:center;font-family:'Orbitron',monospace;font-size:13px;letter-spacing:4px;padding:14px;border-radius:10px;text-transform:uppercase;color:var(--t-primary);border:1px solid rgba(0,229,255,.2);background:rgba(0,229,255,.03);animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{0%,100%{border-color:rgba(0,229,255,.2)}50%{border-color:rgba(0,229,255,.5)}}
+/* See-all buzzes */
 
 /* Lock toggle */
 .lock-toggle{padding:12px 16px;border-radius:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:8px;transition:all .25s;border:2px solid}
@@ -155,12 +155,14 @@ main{position:relative;z-index:1;padding:10px;max-width:520px;margin:0 auto;padd
       </div>
     </header>
 
-    <!-- Buzz hero card -->
-    <section class="buzz-hero" id="buzzHero" aria-label="Buzz results">
-      <div class="idle-msg" id="idleMsg">Tap "Start Round" to begin</div>
-      <div class="wait-badge" id="waitBadge" style="display:none" role="status" aria-live="polite">Waiting for buzz…</div>
-      <div id="firstBox" style="display:none" role="status" aria-live="polite"></div>
-      <button class="bz-more" id="saBtn" style="display:none" onclick="toggleSA()" aria-label="Show all buzzes">▼ See all buzzes</button>
+    <!-- Buzz hero card — fixed layout, content swaps only -->
+    <section class="buzz-hero" id="buzzHero" aria-label="Buzz results" onclick="onBuzzHeroTap()">
+      <div class="bz-label" id="bzLabel">Tap "Start Round" to begin</div>
+      <div class="bz-team" id="bzTeam">&nbsp;</div>
+      <div class="bz-name" id="bzName">&nbsp;</div>
+      <div class="bz-timer" id="bzTimer">&nbsp;</div>
+      <div class="bz-sub" id="bzSub">&nbsp;</div>
+      <button class="bz-more" id="saBtn" style="visibility:hidden" onclick="event.stopPropagation();toggleSA()" aria-label="Show all buzzes">▼ See all buzzes</button>
       <div class="bz-list" id="bList" role="list"></div>
     </section>
 
@@ -199,20 +201,20 @@ main{position:relative;z-index:1;padding:10px;max-width:520px;margin:0 auto;padd
 
     <!-- Actions -->
     <div class="actions">
-      <button class="btn-big arm" id="btnArm" onclick="doArm()" disabled aria-label="Start round — enable buzzers">⚡ Start Round</button>
-      <button class="btn-big rst" id="btnRst" onclick="doReset()" style="display:none" aria-label="Reset round">↺ Reset</button>
+      <button class="btn-big arm" id="btnArm" onclick="doArm()" disabled aria-label="Start round — enable buzzers" style="width:100%">⚡ Start Round</button>
     </div>
   </div>
 </main>
 
 <script>
 let host=null,sndOn=true,saOpen=false,timerInt=null,lobbyData={players:[],teams:[],teamsLocked:false};
+let roundState='idle'; // idle | armed | buzzed | expired
 
 function toggleSnd(){sndOn=!sndOn;document.getElementById('sndB').textContent=sndOn?'🔊 Sound on':'🔇 Sound off';}
 function openQR(){document.getElementById('qrOverlay').classList.add('on');}
 function closeQR(){document.getElementById('qrOverlay').classList.remove('on');}
 
-window.addEventListener('DOMContentLoaded',()=>{doCreate();});
+window.addEventListener('DOMContentLoaded',()=>{doCreate();renderThemePicker();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeQR();});
 
 async function doCreate(){
@@ -230,6 +232,7 @@ function showGame(code){
   document.getElementById('qrUrl').textContent=url;
   const qb=document.getElementById('qrBox');qb.innerHTML='';
   new QRCode(qb,{text:url,width:170,height:170,colorDark:'#00E5FF',colorLight:'#06060C',correctLevel:QRCode.CorrectLevel.M});
+  setHeroIdle();
 }
 
 function onHostUpdate(msg){
@@ -241,8 +244,135 @@ function onHostUpdate(msg){
   }
 }
 
-function renderLobby(){
-  const{players,teams,teamsLocked}=lobbyData;
+// === Stable hero card state machine ===
+function setHeroIdle(){
+  roundState='idle';
+  const hero=document.getElementById('buzzHero');
+  hero.style.borderColor='var(--t-card-bdr)';
+  hero.classList.remove('tappable');
+  document.getElementById('bzLabel').textContent='Tap "Start Round" to begin';
+  document.getElementById('bzLabel').style.color='';
+  document.getElementById('bzTeam').innerHTML='&nbsp;';
+  document.getElementById('bzName').innerHTML='&nbsp;';
+  document.getElementById('bzName').style.color='';
+  document.getElementById('bzName').style.textShadow='none';
+  document.getElementById('bzTimer').innerHTML='&nbsp;';
+  document.getElementById('bzTimer').style.color='';
+  document.getElementById('bzTimer').style.opacity='1';
+  document.getElementById('bzSub').innerHTML='&nbsp;';
+  document.getElementById('saBtn').style.visibility='hidden';
+  document.getElementById('bList').classList.remove('open');
+  document.getElementById('bList').innerHTML='';
+  saOpen=false;
+  if(timerInt){clearInterval(timerInt);timerInt=null;}
+  // Re-enable Start Round button
+  document.getElementById('btnArm').disabled=(lobbyData.players||[]).length===0;
+  document.getElementById('btnArm').style.opacity='1';
+  document.getElementById('btnArm').style.pointerEvents='auto';
+}
+
+function setHeroWaiting(){
+  roundState='armed';
+  const hero=document.getElementById('buzzHero');
+  hero.style.borderColor='var(--t-primary)';
+  hero.classList.remove('tappable');
+  document.getElementById('bzLabel').textContent='Waiting for buzz…';
+  document.getElementById('bzLabel').style.color='var(--t-primary)';
+  document.getElementById('bzTeam').innerHTML='&nbsp;';
+  document.getElementById('bzName').innerHTML='&nbsp;';
+  document.getElementById('bzName').style.color='';
+  document.getElementById('bzName').style.textShadow='none';
+  document.getElementById('bzTimer').innerHTML='&nbsp;';
+  document.getElementById('bzTimer').style.color='var(--t-primary)';
+  document.getElementById('bzTimer').style.opacity='1';
+  document.getElementById('bzSub').innerHTML='&nbsp;';
+  document.getElementById('saBtn').style.visibility='hidden';
+  document.getElementById('bList').classList.remove('open');
+  document.getElementById('bList').innerHTML='';
+  saOpen=false;
+  // Disable Start Round while armed
+  document.getElementById('btnArm').disabled=true;
+  document.getElementById('btnArm').style.opacity='.2';
+  document.getElementById('btnArm').style.pointerEvents='none';
+}
+
+function showFirst(msg){
+  roundState='buzzed';
+  if(sndOn)playSound('buzz');
+  const hero=document.getElementById('buzzHero');
+  hero.style.borderColor=msg.color;
+  hero.classList.remove('tappable');
+  const teamInfo=msg.team&&lobbyData.teams.find(t=>t.id===msg.team);
+  document.getElementById('bzLabel').textContent='🏆 First Buzzer';
+  document.getElementById('bzLabel').style.color='';
+  document.getElementById('bzTeam').textContent=teamInfo?teamInfo.name:' ';
+  document.getElementById('bzTeam').style.color=teamInfo?teamInfo.color:'';
+  document.getElementById('bzName').textContent=msg.name;
+  document.getElementById('bzName').style.color=msg.color;
+  document.getElementById('bzName').style.textShadow='0 0 14px '+msg.color;
+  document.getElementById('bzSub').textContent='Answer time';
+
+  let rem=msg.timerDuration;
+  document.getElementById('bzTimer').textContent=rem.toFixed(1)+'s';
+  document.getElementById('bzTimer').style.color=msg.color;
+  document.getElementById('bzTimer').style.opacity='1';
+
+  if(timerInt)clearInterval(timerInt);
+  const t0=Date.now();
+  timerInt=setInterval(()=>{
+    rem=Math.max(0,msg.timerDuration-(Date.now()-t0)/1000);
+    const cd=document.getElementById('bzTimer');
+    if(cd){
+      cd.textContent=rem.toFixed(1)+'s';
+      if(rem<=0){
+        clearInterval(timerInt);timerInt=null;
+        cd.style.opacity='.3';
+        onTimerExpired();
+      }
+    }
+  },50);
+}
+
+function onTimerExpired(){
+  roundState='expired';
+  document.getElementById('bzSub').textContent='Time up';
+  document.getElementById('buzzHero').classList.add('tappable');
+}
+
+function onBuzzHeroTap(){
+  if(roundState==='expired'){
+    // Reset and go back to idle
+    host.resetRound();
+    setHeroIdle();
+  }
+}
+
+function doArm(){
+  if(roundState!=='idle') return;
+  host.setTimer(document.getElementById('timerInput').value);
+  host.armRound();
+  if(sndOn)playSound('arm');
+  setHeroWaiting();
+}
+
+function showBuzzList(buzzes){
+  if(buzzes.length>1){
+    document.getElementById('saBtn').style.visibility='visible';
+    document.getElementById('saBtn').textContent=(saOpen?'▲ Hide':'▼ See all')+' buzzes ('+buzzes.length+')';
+  }
+  document.getElementById('bList').innerHTML=buzzes.slice(1).map(b=>
+    '<div class="bz-item" role="listitem"><span class="bz-ord" style="color:'+b.color+'">#'+b.order+'</span><span class="bz-dot" style="background:'+b.color+'"></span><span style="flex:1;font-weight:600">'+esc(b.name)+'</span><span class="bz-gap">+'+b.gap+'ms</span></div>'
+  ).join('');
+}
+
+function toggleSA(){
+  saOpen=!saOpen;
+  document.getElementById('bList').classList.toggle('open',saOpen);
+  const btn=document.getElementById('saBtn'),n=btn.textContent.match(/\(\d+\)/)?.[0]||'';
+  btn.textContent=(saOpen?'▲ Hide':'▼ See all')+' buzzes '+n;
+}
+
+function renderLobby(){  const{players,teams,teamsLocked}=lobbyData;
   document.getElementById('btnArm').disabled=players.length===0;
 
   // Lock toggle
@@ -299,73 +429,6 @@ function toggleLock(){if(lobbyData.teamsLocked)host.unlockTeams();else host.lock
 function penTeam(tid){host.penalizeTeam(tid);}
 function kickP(pid){host.kickPlayer(pid);}
 function onTimerChange(v){host.setTimer(v);}
-
-function doArm(){
-  host.setTimer(document.getElementById('timerInput').value);
-  host.armRound();
-  if(sndOn)playSound('arm');
-  document.getElementById('btnArm').style.display='none';
-  document.getElementById('btnRst').style.display='flex';
-  document.getElementById('idleMsg').style.display='none';
-  document.getElementById('waitBadge').style.display='block';
-  document.getElementById('firstBox').style.display='none';
-  document.getElementById('saBtn').style.display='none';
-  document.getElementById('bList').classList.remove('open');
-  document.getElementById('bList').innerHTML='';
-  saOpen=false;if(timerInt)clearInterval(timerInt);
-}
-
-function doReset(){
-  host.resetRound();
-  document.getElementById('btnArm').style.display='flex';
-  document.getElementById('btnRst').style.display='none';
-  document.getElementById('idleMsg').style.display='block';
-  document.getElementById('waitBadge').style.display='none';
-  document.getElementById('firstBox').style.display='none';
-  document.getElementById('saBtn').style.display='none';
-  document.getElementById('bList').classList.remove('open');
-  document.getElementById('bList').innerHTML='';
-  saOpen=false;if(timerInt)clearInterval(timerInt);
-}
-
-function showFirst(msg){
-  if(sndOn)playSound('buzz');
-  document.getElementById('waitBadge').style.display='none';
-  const el=document.getElementById('firstBox');
-  el.style.display='block';
-  document.getElementById('buzzHero').style.borderColor=msg.color;
-  const teamInfo=msg.team&&lobbyData.teams.find(t=>t.id===msg.team);
-  const teamLabel=teamInfo?`<div class="bz-team" style="color:${teamInfo.color}">${esc(teamInfo.name)}</div>`:'';
-  let rem=msg.timerDuration;
-  el.innerHTML=`<div class="bz-label">🏆 First Buzzer</div>${teamLabel}
-    <div class="bz-name" style="color:${msg.color};text-shadow:0 0 14px ${msg.color}">${esc(msg.name)}</div>
-    <div class="bz-timer" id="cd" style="color:${msg.color}">${rem.toFixed(1)}s</div>
-    <div class="bz-sub">Answer time</div>`;
-  if(timerInt)clearInterval(timerInt);
-  const t0=Date.now();
-  timerInt=setInterval(()=>{
-    rem=Math.max(0,msg.timerDuration-(Date.now()-t0)/1000);
-    const cd=document.getElementById('cd');
-    if(cd){cd.textContent=rem.toFixed(1)+'s';if(rem<=0){clearInterval(timerInt);cd.style.opacity='.3';}}
-  },50);
-}
-
-function showBuzzList(buzzes){
-  if(buzzes.length>1){
-    document.getElementById('saBtn').style.display='block';
-    document.getElementById('saBtn').textContent=(saOpen?'▲ Hide':'▼ See all')+` buzzes (${buzzes.length})`;
-  }
-  document.getElementById('bList').innerHTML=buzzes.slice(1).map(b=>
-    `<div class="bz-item" role="listitem"><span class="bz-ord" style="color:${b.color}">#${b.order}</span><span class="bz-dot" style="background:${b.color}"></span><span style="flex:1;font-weight:600">${esc(b.name)}</span><span class="bz-gap">+${b.gap}ms</span></div>`
-  ).join('');
-}
-
-function toggleSA(){
-  saOpen=!saOpen;
-  document.getElementById('bList').classList.toggle('open',saOpen);
-  const btn=document.getElementById('saBtn'),n=btn.textContent.match(/\(\d+\)/)?.[0]||'';
-  btn.textContent=(saOpen?'▲ Hide':'▼ See all')+` buzzes ${n}`;
-}
 
 // Theme system
 let activeTheme='neon';
