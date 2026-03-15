@@ -93,24 +93,22 @@ main{position:relative;z-index:1;padding:10px;max-width:520px;margin:0 auto;padd
 .no-team{background:var(--t-s1);border:1px solid var(--t-bdr);border-radius:10px;padding:8px 10px;margin-top:6px}
 .no-team-hd{font-size:12px;color:var(--t-dim);letter-spacing:1px;margin-bottom:4px}
 
-/* Timer input */
-.timer-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--t-s1);border:1px solid var(--t-bdr);border-radius:10px;margin-top:8px}
-.timer-row label{font-size:12px;color:var(--t-dim);letter-spacing:2px;text-transform:uppercase;font-weight:600}
-.timer-input-wrap{display:flex;align-items:center;gap:6px;margin-left:auto}
-.timer-input{width:52px;padding:7px 4px;font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:var(--t-primary);background:var(--t-bg);border:1px solid var(--t-bdr);border-radius:8px;text-align:center;outline:none;-moz-appearance:textfield}
+/* Timer-start button */
+.timer-start{width:100%;display:flex;align-items:center;padding:14px 16px;background:var(--t-card-bg);border:2px solid var(--t-primary);border-radius:12px;margin-top:8px;cursor:pointer;transition:all .25s;gap:10px;position:relative}
+.timer-start:hover{background:var(--t-s2)}
+.timer-start:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.timer-start:disabled{opacity:.3;cursor:not-allowed;border-color:var(--t-card-bdr)}
+.timer-start.active{border-color:var(--t-primary);animation:timerPulse 1.5s ease-in-out infinite}
+.timer-start.buzzed{border-color:var(--t-secondary);animation:none}
+.timer-start.expired{border-color:var(--t-dim);animation:tapPulse 1.5s ease-in-out infinite}
+@keyframes timerPulse{0%,100%{border-color:var(--t-primary)}50%{border-color:transparent}}
+.ts-label{font-size:12px;color:var(--t-dim);letter-spacing:2px;text-transform:uppercase;font-weight:600;pointer-events:none}
+.ts-row{display:flex;align-items:center;gap:6px;margin-left:auto}
+.timer-input{width:52px;padding:7px 4px;font-family:'Orbitron',monospace;font-size:20px;font-weight:700;color:var(--t-primary);background:var(--t-input-bg);border:1px solid var(--t-bdr);border-radius:8px;text-align:center;outline:none;-moz-appearance:textfield}
 .timer-input::-webkit-inner-spin-button,.timer-input::-webkit-outer-spin-button{-webkit-appearance:none}
 .timer-input:focus{border-color:var(--t-primary)}
-.timer-unit{font-size:14px;color:var(--t-dim);font-weight:600}
-
-/* Action buttons */
-.actions{margin-top:10px;display:flex;gap:6px}
-.btn-big{flex:1;font-family:'Orbitron',monospace;font-size:clamp(14px,4vw,17px);font-weight:700;letter-spacing:3px;padding:16px;border:none;border-radius:12px;cursor:pointer;text-transform:uppercase;transition:all .25s;text-align:center}
-.btn-big:focus-visible{outline:2px solid #fff;outline-offset:2px}
-.btn-big.arm{background:var(--t-btn-start-bg);color:var(--t-btn-start-c)}
-.btn-big.arm:hover{transform:scale(1.02)}
-.btn-big.rst{background:var(--t-btn-reset-bg);color:var(--t-btn-reset-c)}
-.btn-big.rst:hover{transform:scale(1.02)}
-.btn-big:disabled{opacity:.2;cursor:not-allowed;transform:none!important}
+.ts-unit{font-size:14px;color:var(--t-dim);font-weight:600;pointer-events:none}
+.ts-hint{position:absolute;right:16px;bottom:-18px;font-size:11px;color:var(--t-dim);letter-spacing:1px;transition:all .2s}
 
 .theme-btn{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;padding:8px 14px;border-radius:8px;border:2px solid var(--t-bdr);background:var(--t-s2);color:var(--t-dim);cursor:pointer;transition:all .2s;letter-spacing:1px}
 .theme-btn:hover,.theme-btn:focus-visible{border-color:var(--t-primary);color:var(--t-primary);outline:none}
@@ -157,7 +155,7 @@ main{position:relative;z-index:1;padding:10px;max-width:520px;margin:0 auto;padd
 
     <!-- Buzz hero card — fixed layout, content swaps only -->
     <section class="buzz-hero" id="buzzHero" aria-label="Buzz results" onclick="onBuzzHeroTap()">
-      <div class="bz-label" id="bzLabel">Tap "Start Round" to begin</div>
+      <div class="bz-label" id="bzLabel">Ready</div>
       <div class="bz-team" id="bzTeam">&nbsp;</div>
       <div class="bz-name" id="bzName">&nbsp;</div>
       <div class="bz-timer" id="bzTimer">&nbsp;</div>
@@ -184,24 +182,20 @@ main{position:relative;z-index:1;padding:10px;max-width:520px;margin:0 auto;padd
       <div id="noTeamList"></div>
     </div>
 
-    <!-- Timer -->
-    <div class="timer-row">
-      <label for="timerInput">Answer timer</label>
-      <div class="timer-input-wrap">
-        <input class="timer-input" id="timerInput" type="number" min="1" max="60" value="3" aria-label="Timer duration in seconds" onchange="onTimerChange(this.value)">
-        <span class="timer-unit">seconds</span>
+    <!-- Timer = Start button -->
+    <button class="timer-start" id="timerStart" onclick="onTimerTap()" disabled aria-label="Set timer and start round">
+      <label class="ts-label" for="timerInput">Answer timer</label>
+      <div class="ts-row">
+        <input class="timer-input" id="timerInput" type="number" min="1" max="60" value="3" aria-label="Timer duration in seconds" onclick="event.stopPropagation()" onchange="onTimerChange(this.value)">
+        <span class="ts-unit">sec</span>
       </div>
-    </div>
+      <div class="ts-hint" id="tsHint">Tap to start round</div>
+    </button>
 
     <!-- Theme picker -->
-    <div class="timer-row" style="flex-wrap:wrap;gap:6px">
-      <label style="width:100%">Theme (syncs to all players)</label>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--t-card-bg);border:1px solid var(--t-card-bdr);border-radius:10px;margin-top:8px;flex-wrap:wrap">
+      <label style="font-size:12px;color:var(--t-dim);letter-spacing:2px;text-transform:uppercase;font-weight:600;width:100%">Theme (syncs to all players)</label>
       <div id="themeBtns" style="display:flex;gap:4px;flex-wrap:wrap;width:100%"></div>
-    </div>
-
-    <!-- Actions -->
-    <div class="actions">
-      <button class="btn-big arm" id="btnArm" onclick="doArm()" disabled aria-label="Start round — enable buzzers" style="width:100%">⚡ Start Round</button>
     </div>
   </div>
 </main>
@@ -250,7 +244,7 @@ function setHeroIdle(){
   const hero=document.getElementById('buzzHero');
   hero.style.borderColor='var(--t-card-bdr)';
   hero.classList.remove('tappable');
-  document.getElementById('bzLabel').textContent='Tap "Start Round" to begin';
+  document.getElementById('bzLabel').textContent='Ready';
   document.getElementById('bzLabel').style.color='';
   document.getElementById('bzTeam').innerHTML='&nbsp;';
   document.getElementById('bzName').innerHTML='&nbsp;';
@@ -265,10 +259,12 @@ function setHeroIdle(){
   document.getElementById('bList').innerHTML='';
   saOpen=false;
   if(timerInt){clearInterval(timerInt);timerInt=null;}
-  // Re-enable Start Round button
-  document.getElementById('btnArm').disabled=(lobbyData.players||[]).length===0;
-  document.getElementById('btnArm').style.opacity='1';
-  document.getElementById('btnArm').style.pointerEvents='auto';
+  // Timer button state
+  const ts=document.getElementById('timerStart');
+  ts.disabled=(lobbyData.players||[]).length===0;
+  ts.className='timer-start';
+  document.getElementById('timerInput').disabled=false;
+  document.getElementById('tsHint').textContent='Tap to start round';
 }
 
 function setHeroWaiting(){
@@ -290,10 +286,11 @@ function setHeroWaiting(){
   document.getElementById('bList').classList.remove('open');
   document.getElementById('bList').innerHTML='';
   saOpen=false;
-  // Disable Start Round while armed
-  document.getElementById('btnArm').disabled=true;
-  document.getElementById('btnArm').style.opacity='.2';
-  document.getElementById('btnArm').style.pointerEvents='none';
+  // Timer button state
+  const ts=document.getElementById('timerStart');
+  ts.className='timer-start active';
+  document.getElementById('timerInput').disabled=true;
+  document.getElementById('tsHint').textContent='Round active…';
 }
 
 function showFirst(msg){
@@ -317,6 +314,11 @@ function showFirst(msg){
   document.getElementById('bzTimer').style.color=msg.color;
   document.getElementById('bzTimer').style.opacity='1';
 
+  // Timer button state
+  const ts=document.getElementById('timerStart');
+  ts.className='timer-start buzzed';
+  document.getElementById('tsHint').textContent='';
+
   if(timerInt)clearInterval(timerInt);
   const t0=Date.now();
   timerInt=setInterval(()=>{
@@ -337,22 +339,42 @@ function onTimerExpired(){
   roundState='expired';
   document.getElementById('bzSub').textContent='Time up';
   document.getElementById('buzzHero').classList.add('tappable');
+  // Timer button state
+  const ts=document.getElementById('timerStart');
+  ts.className='timer-start expired';
+  document.getElementById('tsHint').textContent='Tap to start next round';
 }
 
+// Tap on buzz hero card OR timer button = advance
 function onBuzzHeroTap(){
   if(roundState==='expired'){
-    // Reset and go back to idle
     host.resetRound();
     setHeroIdle();
+    // Auto-start the next round immediately
+    setTimeout(()=>{ onTimerTap(); }, 100);
   }
 }
 
-function doArm(){
-  if(roundState!=='idle') return;
-  host.setTimer(document.getElementById('timerInput').value);
-  host.armRound();
-  if(sndOn)playSound('arm');
-  setHeroWaiting();
+function onTimerTap(){
+  if(roundState==='idle'){
+    // Start round
+    if((lobbyData.players||[]).length===0) return;
+    host.setTimer(document.getElementById('timerInput').value);
+    host.armRound();
+    if(sndOn)playSound('arm');
+    setHeroWaiting();
+  } else if(roundState==='expired'||roundState==='buzzed'){
+    // Reset and start new round
+    host.resetRound();
+    setHeroIdle();
+    setTimeout(()=>{
+      if((lobbyData.players||[]).length===0) return;
+      host.setTimer(document.getElementById('timerInput').value);
+      host.armRound();
+      if(sndOn)playSound('arm');
+      setHeroWaiting();
+    }, 150);
+  }
 }
 
 function showBuzzList(buzzes){
@@ -373,7 +395,7 @@ function toggleSA(){
 }
 
 function renderLobby(){  const{players,teams,teamsLocked}=lobbyData;
-  document.getElementById('btnArm').disabled=players.length===0;
+  document.getElementById('timerStart').disabled=players.length===0;
 
   // Lock toggle
   const lt=document.getElementById('lockToggle');
