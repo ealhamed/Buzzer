@@ -43,16 +43,31 @@ main{position:relative;z-index:1;padding:10px;max-width:520px;margin:0 auto;padd
 .setup-msg{font-family:'Orbitron',monospace;font-size:14px;color:var(--t-primary);letter-spacing:3px}
 .setup-err{color:var(--t-secondary);font-size:14px;margin-top:10px}
 
-/* Buzz hero — fixed layout */
-.buzz-hero{background:var(--t-card-bg);border:2px solid var(--t-card-bdr);border-radius:14px;padding:20px 14px;text-align:center;margin-top:8px;transition:border-color .3s;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:default;position:relative}
-.buzz-hero.tappable{cursor:pointer}
-.buzz-hero.tappable::after{content:'Tap to start next round';position:absolute;bottom:10px;font-size:12px;color:var(--t-dim);letter-spacing:1px;animation:tapPulse 1.5s ease-in-out infinite}
-@keyframes tapPulse{0%,100%{opacity:.4}50%{opacity:1}}
-.bz-label{font-size:11px;letter-spacing:4px;color:var(--t-dim);text-transform:uppercase;min-height:18px}
-.bz-team{font-size:13px;font-weight:600;min-height:20px;transition:color .2s}
-.bz-name{font-family:'Orbitron',monospace;font-size:clamp(24px,7vw,32px);font-weight:900;letter-spacing:2px;min-height:40px;display:flex;align-items:center;justify-content:center;transition:color .2s}
-.bz-timer{font-family:'Orbitron',monospace;font-size:clamp(40px,11vw,54px);font-weight:900;line-height:1;min-height:56px;display:flex;align-items:center;justify-content:center;transition:color .2s,opacity .2s}
-.bz-sub{font-size:11px;letter-spacing:2px;color:var(--t-dim);text-transform:uppercase;min-height:18px}
+/* The Box — unified interactive card */
+.the-box{background:var(--t-card-bg);border:3px solid var(--t-primary);border-radius:16px;padding:24px 16px;text-align:center;margin-top:8px;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:border-color .3s,transform .1s;position:relative;-webkit-tap-highlight-color:transparent;user-select:none}
+.the-box:active{transform:scale(.97)}
+.the-box:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.the-box.disabled{opacity:.3;cursor:not-allowed;border-color:var(--t-card-bdr)}
+.the-box.disabled:active{transform:none}
+.the-box.waiting{animation:boxPulse 2s ease-in-out infinite}
+.the-box.buzzed{animation:none}
+.the-box.expired{animation:none;border-color:var(--t-dim)}
+@keyframes boxPulse{0%,100%{border-color:var(--t-primary)}50%{border-color:var(--t-card-bdr)}}
+.box-label{font-family:'Orbitron',monospace;font-size:clamp(16px,4.5vw,22px);font-weight:700;letter-spacing:4px;color:var(--t-primary);text-transform:uppercase;min-height:28px;display:flex;align-items:center;justify-content:center;transition:color .2s}
+.box-team{font-size:14px;font-weight:600;min-height:20px;transition:color .2s}
+.box-name{font-family:'Orbitron',monospace;font-size:clamp(28px,8vw,38px);font-weight:900;letter-spacing:2px;min-height:46px;display:flex;align-items:center;justify-content:center;transition:color .2s}
+.box-timer{font-family:'Orbitron',monospace;font-size:clamp(48px,13vw,64px);font-weight:900;line-height:1;min-height:66px;display:flex;align-items:center;justify-content:center;transition:color .2s,opacity .2s}
+.box-sub{font-size:12px;letter-spacing:2px;color:var(--t-dim);text-transform:uppercase;min-height:18px}
+
+/* Timer setting */
+.timer-setting{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--t-card-bg);border:1px solid var(--t-card-bdr);border-radius:10px;margin-top:8px}
+.timer-setting label{font-size:12px;color:var(--t-dim);letter-spacing:2px;text-transform:uppercase;font-weight:600}
+.timer-input{width:50px;padding:6px 4px;font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:var(--t-primary);background:var(--t-input-bg);border:1px solid var(--t-bdr);border-radius:8px;text-align:center;outline:none;-moz-appearance:textfield;margin-left:auto}
+.timer-input::-webkit-inner-spin-button,.timer-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.timer-input:focus{border-color:var(--t-primary)}
+.timer-unit{font-size:13px;color:var(--t-dim);font-weight:600}
+
+/* See-all buzzes */
 .bz-more{width:100%;padding:8px;margin-top:10px;background:var(--t-s2);border:1px solid var(--t-bdr);border-radius:8px;color:var(--t-dim);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .2s}
 .bz-more:hover{border-color:var(--t-primary);color:var(--t-primary)}
 .bz-list{display:none;margin-top:8px;flex-direction:column;gap:4px}.bz-list.open{display:flex}
@@ -60,8 +75,6 @@ main{position:relative;z-index:1;padding:10px;max-width:520px;margin:0 auto;padd
 .bz-ord{font-family:'Orbitron',monospace;font-weight:700;font-size:11px;width:22px;text-align:center}
 .bz-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .bz-gap{font-family:'Orbitron',monospace;font-size:11px;color:var(--t-dim);margin-left:auto}
-
-/* See-all buzzes */
 
 /* Lock toggle */
 .lock-toggle{padding:12px 16px;border-radius:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:8px;transition:all .25s;border:2px solid}
@@ -89,26 +102,9 @@ main{position:relative;z-index:1;padding:10px;max-width:520px;margin:0 auto;padd
 .tp-kick{font-size:10px;padding:2px 8px;border-radius:4px;background:var(--t-s2);color:var(--t-dim);cursor:pointer;border:none;font-family:'Rajdhani',sans-serif;font-weight:600;transition:all .15s}
 .tp-kick:hover,.tp-kick:focus-visible{color:var(--t-secondary);outline:none}
 
-/* No team section */
+/* No team */
 .no-team{background:var(--t-s1);border:1px solid var(--t-bdr);border-radius:10px;padding:8px 10px;margin-top:6px}
 .no-team-hd{font-size:12px;color:var(--t-dim);letter-spacing:1px;margin-bottom:4px}
-
-/* Timer-start button */
-.timer-start{width:100%;display:flex;align-items:center;padding:14px 16px;background:var(--t-card-bg);border:2px solid var(--t-primary);border-radius:12px;margin-top:8px;cursor:pointer;transition:all .25s;gap:10px;position:relative}
-.timer-start:hover{background:var(--t-s2)}
-.timer-start:focus-visible{outline:2px solid #fff;outline-offset:2px}
-.timer-start:disabled{opacity:.3;cursor:not-allowed;border-color:var(--t-card-bdr)}
-.timer-start.active{border-color:var(--t-primary);animation:timerPulse 1.5s ease-in-out infinite}
-.timer-start.buzzed{border-color:var(--t-secondary);animation:none}
-.timer-start.expired{border-color:var(--t-dim);animation:tapPulse 1.5s ease-in-out infinite}
-@keyframes timerPulse{0%,100%{border-color:var(--t-primary)}50%{border-color:transparent}}
-.ts-label{font-size:12px;color:var(--t-dim);letter-spacing:2px;text-transform:uppercase;font-weight:600;pointer-events:none}
-.ts-row{display:flex;align-items:center;gap:6px;margin-left:auto}
-.timer-input{width:52px;padding:7px 4px;font-family:'Orbitron',monospace;font-size:20px;font-weight:700;color:var(--t-primary);background:var(--t-input-bg);border:1px solid var(--t-bdr);border-radius:8px;text-align:center;outline:none;-moz-appearance:textfield}
-.timer-input::-webkit-inner-spin-button,.timer-input::-webkit-outer-spin-button{-webkit-appearance:none}
-.timer-input:focus{border-color:var(--t-primary)}
-.ts-unit{font-size:14px;color:var(--t-dim);font-weight:600;pointer-events:none}
-.ts-hint{position:absolute;right:16px;bottom:-18px;font-size:11px;color:var(--t-dim);letter-spacing:1px;transition:all .2s}
 
 .theme-btn{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;padding:8px 14px;border-radius:8px;border:2px solid var(--t-bdr);background:var(--t-s2);color:var(--t-dim);cursor:pointer;transition:all .2s;letter-spacing:1px}
 .theme-btn:hover,.theme-btn:focus-visible{border-color:var(--t-primary);color:var(--t-primary);outline:none}
@@ -153,16 +149,23 @@ main{position:relative;z-index:1;padding:10px;max-width:520px;margin:0 auto;padd
       </div>
     </header>
 
-    <!-- Buzz hero card — fixed layout, content swaps only -->
-    <section class="buzz-hero" id="buzzHero" aria-label="Buzz results" onclick="onBuzzHeroTap()">
-      <div class="bz-label" id="bzLabel">Ready</div>
-      <div class="bz-team" id="bzTeam">&nbsp;</div>
-      <div class="bz-name" id="bzName">&nbsp;</div>
-      <div class="bz-timer" id="bzTimer">&nbsp;</div>
-      <div class="bz-sub" id="bzSub">&nbsp;</div>
+    <!-- The Box — single interactive card: press to begin, shows buzzer, press again to restart -->
+    <section class="the-box" id="theBox" onclick="onBoxTap()" role="button" tabindex="0" aria-label="Press to start round">
+      <div class="box-label" id="boxLabel">Press to begin</div>
+      <div class="box-team" id="boxTeam">&nbsp;</div>
+      <div class="box-name" id="boxName">&nbsp;</div>
+      <div class="box-timer" id="boxTimer">&nbsp;</div>
+      <div class="box-sub" id="boxSub">&nbsp;</div>
       <button class="bz-more" id="saBtn" style="visibility:hidden" onclick="event.stopPropagation();toggleSA()" aria-label="Show all buzzes">▼ See all buzzes</button>
       <div class="bz-list" id="bList" role="list"></div>
     </section>
+
+    <!-- Timer setting (small, separate from the box) -->
+    <div class="timer-setting">
+      <label for="timerInput">Timer</label>
+      <input class="timer-input" id="timerInput" type="number" min="1" max="60" value="3" aria-label="Timer duration in seconds" onchange="onTimerChange(this.value)">
+      <span class="timer-unit">sec</span>
+    </div>
 
     <!-- Lock toggle -->
     <div class="lock-toggle unlocked" id="lockToggle" onclick="toggleLock()" role="switch" aria-checked="false" aria-label="Lock or unlock teams" tabindex="0">
@@ -181,16 +184,6 @@ main{position:relative;z-index:1;padding:10px;max-width:520px;margin:0 auto;padd
       <div class="no-team-hd">No team</div>
       <div id="noTeamList"></div>
     </div>
-
-    <!-- Timer = Start button -->
-    <button class="timer-start" id="timerStart" onclick="onTimerTap()" disabled aria-label="Set timer and start round">
-      <label class="ts-label" for="timerInput">Answer timer</label>
-      <div class="ts-row">
-        <input class="timer-input" id="timerInput" type="number" min="1" max="60" value="3" aria-label="Timer duration in seconds" onclick="event.stopPropagation()" onchange="onTimerChange(this.value)">
-        <span class="ts-unit">sec</span>
-      </div>
-      <div class="ts-hint" id="tsHint">Tap to start round</div>
-    </button>
 
     <!-- Theme picker -->
     <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--t-card-bg);border:1px solid var(--t-card-bdr);border-radius:10px;margin-top:8px;flex-wrap:wrap">
@@ -226,7 +219,7 @@ function showGame(code){
   document.getElementById('qrUrl').textContent=url;
   const qb=document.getElementById('qrBox');qb.innerHTML='';
   new QRCode(qb,{text:url,width:170,height:170,colorDark:'#00E5FF',colorLight:'#06060C',correctLevel:QRCode.CorrectLevel.M});
-  setHeroIdle();
+  setBoxIdle();
 }
 
 function onHostUpdate(msg){
@@ -238,92 +231,77 @@ function onHostUpdate(msg){
   }
 }
 
-// === Stable hero card state machine ===
-function setHeroIdle(){
+// === The Box — single interactive card ===
+function setBoxIdle(){
   roundState='idle';
-  const hero=document.getElementById('buzzHero');
-  hero.style.borderColor='var(--t-card-bdr)';
-  hero.classList.remove('tappable');
-  document.getElementById('bzLabel').textContent='Ready';
-  document.getElementById('bzLabel').style.color='';
-  document.getElementById('bzTeam').innerHTML='&nbsp;';
-  document.getElementById('bzName').innerHTML='&nbsp;';
-  document.getElementById('bzName').style.color='';
-  document.getElementById('bzName').style.textShadow='none';
-  document.getElementById('bzTimer').innerHTML='&nbsp;';
-  document.getElementById('bzTimer').style.color='';
-  document.getElementById('bzTimer').style.opacity='1';
-  document.getElementById('bzSub').innerHTML='&nbsp;';
+  const box=document.getElementById('theBox');
+  box.className='the-box';
+  box.style.borderColor='';
+  document.getElementById('boxLabel').textContent='Press to begin';
+  document.getElementById('boxLabel').style.color='';
+  document.getElementById('boxTeam').innerHTML='&nbsp;';
+  document.getElementById('boxName').innerHTML='&nbsp;';
+  document.getElementById('boxName').style.color='';
+  document.getElementById('boxName').style.textShadow='none';
+  document.getElementById('boxTimer').innerHTML='&nbsp;';
+  document.getElementById('boxTimer').style.color='';
+  document.getElementById('boxTimer').style.opacity='1';
+  document.getElementById('boxSub').innerHTML='&nbsp;';
   document.getElementById('saBtn').style.visibility='hidden';
   document.getElementById('bList').classList.remove('open');
   document.getElementById('bList').innerHTML='';
   saOpen=false;
   if(timerInt){clearInterval(timerInt);timerInt=null;}
-  // Timer button state
-  const ts=document.getElementById('timerStart');
-  ts.disabled=(lobbyData.players||[]).length===0;
-  ts.className='timer-start';
-  document.getElementById('timerInput').disabled=false;
-  document.getElementById('tsHint').textContent='Tap to start round';
+  // Disable if no players
+  if((lobbyData.players||[]).length===0) box.classList.add('disabled');
 }
 
-function setHeroWaiting(){
+function setBoxWaiting(){
   roundState='armed';
-  const hero=document.getElementById('buzzHero');
-  hero.style.borderColor='var(--t-primary)';
-  hero.classList.remove('tappable');
-  document.getElementById('bzLabel').textContent='Waiting for buzz…';
-  document.getElementById('bzLabel').style.color='var(--t-primary)';
-  document.getElementById('bzTeam').innerHTML='&nbsp;';
-  document.getElementById('bzName').innerHTML='&nbsp;';
-  document.getElementById('bzName').style.color='';
-  document.getElementById('bzName').style.textShadow='none';
-  document.getElementById('bzTimer').innerHTML='&nbsp;';
-  document.getElementById('bzTimer').style.color='var(--t-primary)';
-  document.getElementById('bzTimer').style.opacity='1';
-  document.getElementById('bzSub').innerHTML='&nbsp;';
+  const box=document.getElementById('theBox');
+  box.className='the-box waiting';
+  document.getElementById('boxLabel').textContent='Waiting for buzz…';
+  document.getElementById('boxLabel').style.color='var(--t-primary)';
+  document.getElementById('boxTeam').innerHTML='&nbsp;';
+  document.getElementById('boxName').innerHTML='&nbsp;';
+  document.getElementById('boxName').style.color='';
+  document.getElementById('boxName').style.textShadow='none';
+  document.getElementById('boxTimer').innerHTML='&nbsp;';
+  document.getElementById('boxTimer').style.color='var(--t-primary)';
+  document.getElementById('boxTimer').style.opacity='1';
+  document.getElementById('boxSub').innerHTML='&nbsp;';
   document.getElementById('saBtn').style.visibility='hidden';
   document.getElementById('bList').classList.remove('open');
   document.getElementById('bList').innerHTML='';
   saOpen=false;
-  // Timer button state
-  const ts=document.getElementById('timerStart');
-  ts.className='timer-start active';
-  document.getElementById('timerInput').disabled=true;
-  document.getElementById('tsHint').textContent='Round active…';
 }
 
 function showFirst(msg){
   roundState='buzzed';
   if(sndOn)playSound('buzz');
-  const hero=document.getElementById('buzzHero');
-  hero.style.borderColor=msg.color;
-  hero.classList.remove('tappable');
+  const box=document.getElementById('theBox');
+  box.className='the-box buzzed';
+  box.style.borderColor=msg.color;
   const teamInfo=msg.team&&lobbyData.teams.find(t=>t.id===msg.team);
-  document.getElementById('bzLabel').textContent='🏆 First Buzzer';
-  document.getElementById('bzLabel').style.color='';
-  document.getElementById('bzTeam').textContent=teamInfo?teamInfo.name:' ';
-  document.getElementById('bzTeam').style.color=teamInfo?teamInfo.color:'';
-  document.getElementById('bzName').textContent=msg.name;
-  document.getElementById('bzName').style.color=msg.color;
-  document.getElementById('bzName').style.textShadow='0 0 14px '+msg.color;
-  document.getElementById('bzSub').textContent='Answer time';
+  document.getElementById('boxLabel').textContent='🏆 First Buzzer';
+  document.getElementById('boxLabel').style.color='';
+  document.getElementById('boxTeam').textContent=teamInfo?teamInfo.name:' ';
+  document.getElementById('boxTeam').style.color=teamInfo?teamInfo.color:'';
+  document.getElementById('boxName').textContent=msg.name;
+  document.getElementById('boxName').style.color=msg.color;
+  document.getElementById('boxName').style.textShadow='0 0 14px '+msg.color;
+  document.getElementById('boxSub').textContent='Answer time';
 
   let rem=msg.timerDuration;
-  document.getElementById('bzTimer').textContent=rem.toFixed(1)+'s';
-  document.getElementById('bzTimer').style.color=msg.color;
-  document.getElementById('bzTimer').style.opacity='1';
-
-  // Timer button state
-  const ts=document.getElementById('timerStart');
-  ts.className='timer-start buzzed';
-  document.getElementById('tsHint').textContent='';
+  document.getElementById('boxTimer').textContent=rem.toFixed(1)+'s';
+  document.getElementById('boxTimer').style.color=msg.color;
+  document.getElementById('boxTimer').style.opacity='1';
 
   if(timerInt)clearInterval(timerInt);
   const t0=Date.now();
   timerInt=setInterval(()=>{
     rem=Math.max(0,msg.timerDuration-(Date.now()-t0)/1000);
-    const cd=document.getElementById('bzTimer');
+    const cd=document.getElementById('boxTimer');
     if(cd){
       cd.textContent=rem.toFixed(1)+'s';
       if(rem<=0){
@@ -337,43 +315,29 @@ function showFirst(msg){
 
 function onTimerExpired(){
   roundState='expired';
-  document.getElementById('bzSub').textContent='Time up';
-  document.getElementById('buzzHero').classList.add('tappable');
-  // Timer button state
-  const ts=document.getElementById('timerStart');
-  ts.className='timer-start expired';
-  document.getElementById('tsHint').textContent='Tap to start next round';
+  document.getElementById('boxSub').textContent='Press to start next round';
+  document.getElementById('theBox').className='the-box expired';
 }
 
-// Tap on buzz hero card OR timer button = advance
-function onBuzzHeroTap(){
-  if(roundState==='expired'){
-    host.resetRound();
-    setHeroIdle();
-    // Auto-start the next round immediately
-    setTimeout(()=>{ onTimerTap(); }, 100);
-  }
-}
-
-function onTimerTap(){
+function onBoxTap(){
   if(roundState==='idle'){
     // Start round
     if((lobbyData.players||[]).length===0) return;
     host.setTimer(document.getElementById('timerInput').value);
     host.armRound();
     if(sndOn)playSound('arm');
-    setHeroWaiting();
+    setBoxWaiting();
   } else if(roundState==='expired'||roundState==='buzzed'){
     // Reset and start new round
     host.resetRound();
-    setHeroIdle();
+    setBoxIdle();
     setTimeout(()=>{
       if((lobbyData.players||[]).length===0) return;
       host.setTimer(document.getElementById('timerInput').value);
       host.armRound();
       if(sndOn)playSound('arm');
-      setHeroWaiting();
-    }, 150);
+      setBoxWaiting();
+    },150);
   }
 }
 
@@ -395,7 +359,7 @@ function toggleSA(){
 }
 
 function renderLobby(){  const{players,teams,teamsLocked}=lobbyData;
-  document.getElementById('timerStart').disabled=players.length===0;
+  const box=document.getElementById('theBox');if(players.length===0)box.classList.add('disabled');else box.classList.remove('disabled');
 
   // Lock toggle
   const lt=document.getElementById('lockToggle');
