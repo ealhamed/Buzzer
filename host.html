@@ -27,6 +27,7 @@ main{position:relative;z-index:1;padding:env(safe-area-inset-top,8px) 12px env(s
 .back-btn:hover,.back-btn:focus-visible,.icon-btn:hover,.icon-btn:focus-visible{border-color:var(--t-primary);color:var(--t-primary);outline:none}
 .hbar-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(22px,6vw,28px);letter-spacing:5px;padding-right:5px;background:var(--t-logo-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .hbar-code{margin-left:auto;font-family:'Bebas Neue',sans-serif;font-size:clamp(22px,6vw,28px);color:var(--t-primary);letter-spacing:6px}
+.player-count{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--t-dim);background:var(--t-s2);border:1px solid var(--t-bdr);border-radius:8px;padding:4px 10px;letter-spacing:1px;min-height:30px;display:flex;align-items:center}
 .snd-badge{position:fixed;top:env(safe-area-inset-top,8px);right:10px;font-size:13px;font-weight:700;color:var(--t-dim);background:var(--t-s1);border:1px solid var(--t-bdr);padding:6px 12px;border-radius:20px;z-index:100;cursor:pointer;transition:all .2s;min-height:36px;display:flex;align-items:center}
 .snd-badge:hover{border-color:var(--t-primary)}
 /* QR Overlay */
@@ -54,6 +55,12 @@ main{position:relative;z-index:1;padding:env(safe-area-inset-top,8px) 12px env(s
 .box-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,10vw,48px);letter-spacing:3px;min-height:52px;display:flex;align-items:center;justify-content:center}
 .box-timer{font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,16vw,80px);line-height:1;min-height:72px;display:flex;align-items:center;justify-content:center}
 .box-sub{font-size:clamp(12px,3vw,15px);letter-spacing:3px;color:var(--t-dim);text-transform:uppercase;min-height:20px;font-weight:800}
+.judge-btns{display:flex;gap:10px;margin-top:12px;width:100%}
+.judge-btn{flex:1;font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,5vw,24px);letter-spacing:3px;padding:14px;border-radius:12px;border:2px solid;cursor:pointer;transition:all .2s;min-height:52px}
+.judge-right{background:rgba(0,255,102,.08);border-color:var(--t-green);color:var(--t-green)}
+.judge-right:hover,.judge-right:active{background:var(--t-green);color:var(--t-bg)}
+.judge-wrong{background:rgba(255,62,108,.08);border-color:var(--t-secondary);color:var(--t-secondary)}
+.judge-wrong:hover,.judge-wrong:active{background:var(--t-secondary);color:#fff}
 .bz-more{width:100%;padding:12px;margin-top:10px;background:var(--t-s2);border:1px solid var(--t-bdr);border-radius:10px;color:var(--t-dim);font-size:14px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:1px;min-height:44px}
 .bz-more:hover{border-color:var(--t-primary);color:var(--t-primary)}
 .bz-list{display:none;margin-top:8px;flex-direction:column;gap:5px}.bz-list.open{display:flex}
@@ -61,10 +68,12 @@ main{position:relative;z-index:1;padding:env(safe-area-inset-top,8px) 12px env(s
 .bz-ord{font-family:'Bebas Neue',sans-serif;font-size:18px;width:28px;text-align:center}
 .bz-dot{width:8px;height:8px;border-radius:50%}
 .bz-gap{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--t-dim);margin-left:auto}
+.skip-btn{width:100%;margin-top:6px;padding:10px;background:transparent;border:1px solid var(--t-bdr);border-radius:10px;color:var(--t-dim);font-family:'Barlow',sans-serif;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:2px;min-height:40px;transition:all .2s}
+.skip-btn:hover{border-color:var(--t-secondary);color:var(--t-secondary)}
 /* Lock toggle */
 .lock-toggle{padding:14px 18px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:8px;border:2px solid;min-height:52px;transition:all .25s}
 .lock-toggle.unlocked{background:var(--t-lock-bg);border-color:var(--t-lock-bdr)}
-.lock-toggle.locked{background:rgba(255,62,108,.05);border-color:rgba(255,62,108,.3)}
+.lock-toggle.locked{background:var(--t-penalty-bg);border-color:var(--t-penalty-bdr)}
 .lock-icon{font-size:20px}.lock-label{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px}.lock-hint{font-size:13px;color:var(--t-dim);font-weight:700}
 /* Teams */
 .teams-grid{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
@@ -131,7 +140,7 @@ main{position:relative;z-index:1;padding:env(safe-area-inset-top,8px) 12px env(s
 
 <!-- Side Panel (Settings) -->
 <div class="sp-overlay" id="spOverlay" onclick="closeSP()"></div>
-<div class="side-panel" id="sidePanel">
+<div class="side-panel glass-target" id="sidePanel">
   <div class="sp-hd"><span class="sp-title">SETTINGS</span><button class="sp-close" onclick="closeSP()">✕</button></div>
 
   <div class="sp-group">
@@ -162,6 +171,7 @@ main{position:relative;z-index:1;padding:env(safe-area-inset-top,8px) 12px env(s
         <div class="hbar-logo" id="stdLogo">BUZZER</div>
         <img id="aldewaniahLogo" src="aldewaniah-logo.png" alt="الديوانية" style="display:none;height:34px;object-fit:contain">
         <div class="hbar-code" id="rcCode"></div>
+        <div class="player-count" id="playerCount">0</div>
         <button class="icon-btn" onclick="openQR()" title="Share Room"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
         <button class="icon-btn" onclick="openSP()" title="Settings">⚙</button>
       </div>
@@ -174,12 +184,17 @@ main{position:relative;z-index:1;padding:env(safe-area-inset-top,8px) 12px env(s
       <div class="box-name" id="boxName">&nbsp;</div>
       <div class="box-timer" id="boxTimer">&nbsp;</div>
       <div class="box-sub" id="boxSub">Waiting for players</div>
+      <div class="judge-btns" id="judgeBtns" style="display:none">
+        <button class="judge-btn judge-right" onclick="event.stopPropagation();judgeRight()">✓ RIGHT</button>
+        <button class="judge-btn judge-wrong" onclick="event.stopPropagation();judgeWrong()">✕ WRONG</button>
+      </div>
       <button class="bz-more" id="saBtn" style="visibility:hidden" onclick="event.stopPropagation();toggleSA()">▼ ALL BUZZES</button>
       <div class="bz-list" id="bList" role="list"></div>
     </section>
+    <button class="skip-btn" id="skipBtn" onclick="skipRound()" style="display:none">SKIP ROUND</button>
 
     <!-- Lock teams -->
-    <div class="lock-toggle unlocked" id="lockToggle" onclick="toggleLock()" role="switch" aria-checked="false" tabindex="0">
+    <div class="lock-toggle unlocked glass-target" id="lockToggle" onclick="toggleLock()" role="switch" aria-checked="false" tabindex="0">
       <div style="display:flex;align-items:center;gap:10px"><span class="lock-icon" id="lockIcon">🔓</span><span class="lock-label" id="lockLabel" style="color:var(--t-green)">TEAMS UNLOCKED</span></div>
       <span class="lock-hint">tap to lock</span>
     </div>
@@ -195,7 +210,7 @@ main{position:relative;z-index:1;padding:env(safe-area-inset-top,8px) 12px env(s
     </div>
 
     <!-- No-team players (with assign dropdown) -->
-    <div class="no-team" id="noTeamBox" style="display:none">
+    <div class="no-team glass-target" id="noTeamBox" style="display:none">
       <div class="no-team-hd">UNASSIGNED PLAYERS</div>
       <div id="noTeamList"></div>
     </div>
@@ -215,6 +230,7 @@ let roundState='idle',activeTheme='thrill';
 let prevPlayerIds=new Set();
 let logOpen=false,logEntries=[],htcSelColor=0;
 let penaltyDuration=10;
+let wrongCount=0,lastBuzzInfo=null; // Track wrong answers per round
 let penaltyEndTimes=new Map(); // targetId → endTimestamp
 let penaltyTickInterval=null;
 
@@ -307,17 +323,20 @@ function onHostUpdate(msg){
 
 // === THE BOX ===
 function setBoxIdle(){
-  roundState='idle';const box=document.getElementById('theBox');
+  roundState='idle';wrongCount=0;lastBuzzInfo=null;
+  const box=document.getElementById('theBox');
   box.className='the-box glass-target';box.style.borderColor='';
   document.getElementById('boxLabel').textContent='PRESS TO BEGIN';document.getElementById('boxLabel').style.color='';
   document.getElementById('boxTeam').innerHTML='&nbsp;';
   document.getElementById('boxName').innerHTML='&nbsp;';document.getElementById('boxName').style.color='';document.getElementById('boxName').style.textShadow='none';
   document.getElementById('boxTimer').innerHTML='&nbsp;';document.getElementById('boxTimer').style.color='';document.getElementById('boxTimer').style.opacity='1';
   document.getElementById('boxSub').textContent=(lobbyData.players||[]).length>0?'Ready':'Waiting for players';
+  document.getElementById('judgeBtns').style.display='none';
   document.getElementById('saBtn').style.visibility='hidden';
   document.getElementById('bList').classList.remove('open');document.getElementById('bList').innerHTML='';saOpen=false;
   if(timerInt){clearInterval(timerInt);timerInt=null;}
   if((lobbyData.players||[]).length===0)box.classList.add('disabled');
+  document.getElementById('skipBtn').style.display='none';
 }
 function setBoxWaiting(){
   roundState='armed';const box=document.getElementById('theBox');
@@ -327,24 +346,126 @@ function setBoxWaiting(){
   document.getElementById('boxName').style.color='';document.getElementById('boxName').style.textShadow='none';
   document.getElementById('boxTimer').innerHTML='&nbsp;';document.getElementById('boxTimer').style.color='var(--t-primary)';document.getElementById('boxTimer').style.opacity='1';
   document.getElementById('boxSub').innerHTML='&nbsp;';
+  document.getElementById('judgeBtns').style.display='none';
   document.getElementById('saBtn').style.visibility='hidden';document.getElementById('bList').classList.remove('open');document.getElementById('bList').innerHTML='';saOpen=false;
+  document.getElementById('skipBtn').style.display='block';
 }
 function showFirst(msg){
   roundState='buzzed';if(sndOn)playSound('buzz');
+  document.getElementById('skipBtn').style.display='none';
+  lastBuzzInfo={id:msg.id,name:msg.name,color:msg.color,team:msg.team};
   const box=document.getElementById('theBox');box.className='the-box glass-target buzzed';box.style.borderColor=msg.color;
   const teamInfo=msg.team&&lobbyData.teams.find(t=>t.id===msg.team);
-  document.getElementById('boxLabel').textContent='🏆 FIRST BUZZER';document.getElementById('boxLabel').style.color='';
+  document.getElementById('boxLabel').textContent='🏆 BUZZER';document.getElementById('boxLabel').style.color='';
   document.getElementById('boxTeam').textContent=teamInfo?teamInfo.name.toUpperCase():' ';document.getElementById('boxTeam').style.color=teamInfo?teamInfo.color:'';
   document.getElementById('boxName').textContent=msg.name.toUpperCase();document.getElementById('boxName').style.color=msg.color;document.getElementById('boxName').style.textShadow='0 0 20px '+msg.color;
   document.getElementById('boxSub').textContent='ANSWER TIME';
+  // Show judge buttons
+  document.getElementById('judgeBtns').style.display='flex';
   let rem=msg.timerDuration;
   document.getElementById('boxTimer').textContent=rem.toFixed(1);document.getElementById('boxTimer').style.color=msg.color;document.getElementById('boxTimer').style.opacity='1';
   if(timerInt)clearInterval(timerInt);const t0=Date.now();
-  timerInt=setInterval(()=>{rem=Math.max(0,msg.timerDuration-(Date.now()-t0)/1000);const cd=document.getElementById('boxTimer');if(cd){cd.textContent=rem.toFixed(1);if(rem<=0){clearInterval(timerInt);timerInt=null;cd.style.opacity='.25';roundState='expired';document.getElementById('boxSub').textContent='PRESS FOR NEXT ROUND';document.getElementById('theBox').className='the-box glass-target expired';if(sndOn)playSound('timeup');host._broadcast({type:'timer_expired'});}}},50);
+  timerInt=setInterval(()=>{rem=Math.max(0,msg.timerDuration-(Date.now()-t0)/1000);const cd=document.getElementById('boxTimer');if(cd){cd.textContent=rem.toFixed(1);if(rem<=0){clearInterval(timerInt);timerInt=null;cd.style.opacity='.25';roundState='expired';document.getElementById('boxSub').textContent='TIME UP — JUDGE THE ANSWER';if(sndOn)playSound('timeup');host._broadcast({type:'timer_expired'});}}},50);
 }
 function onBoxTap(){
-  if(roundState==='idle'){if((lobbyData.players||[]).length===0)return;host.setTimer(document.getElementById('timerInput').value);host.armRound();if(sndOn)playSound('arm');setBoxWaiting();addLog('Round started','var(--t-primary)');}
-  else if(roundState==='expired'||roundState==='buzzed'){host.resetRound();setBoxIdle();setTimeout(()=>{if((lobbyData.players||[]).length===0)return;host.setTimer(document.getElementById('timerInput').value);host.armRound();if(sndOn)playSound('arm');setBoxWaiting();addLog('Round started','var(--t-primary)');},150);}
+  // Only start new rounds from idle or after RIGHT ended the round
+  if(roundState==='idle'){
+    if((lobbyData.players||[]).length===0)return;
+    host.setTimer(document.getElementById('timerInput').value);
+    host.armRound();if(sndOn)playSound('arm');
+    wrongCount=0;lastBuzzInfo=null;
+    setBoxWaiting();addLog('Round started','var(--t-primary)');
+  } else if(roundState==='ended'){
+    // Start fresh round
+    host.resetRound();setBoxIdle();
+    setTimeout(()=>{
+      if((lobbyData.players||[]).length===0)return;
+      host.setTimer(document.getElementById('timerInput').value);
+      host.armRound();if(sndOn)playSound('arm');
+      wrongCount=0;lastBuzzInfo=null;
+      setBoxWaiting();addLog('Round started','var(--t-primary)');
+    },150);
+  }
+}
+
+function judgeRight(){
+  if(timerInt){clearInterval(timerInt);timerInt=null;}
+  roundState='ended';
+  document.getElementById('judgeBtns').style.display='none';
+  document.getElementById('boxLabel').textContent='✓ CORRECT';
+  document.getElementById('boxLabel').style.color='var(--t-green)';
+  document.getElementById('boxSub').textContent='PRESS FOR NEXT ROUND';
+  document.getElementById('boxTimer').textContent='';
+  document.getElementById('theBox').className='the-box glass-target expired';
+  const name=lastBuzzInfo?lastBuzzInfo.name:'?';
+  addLog('✓ '+name+' answered correctly','var(--t-green)');
+  showToast(name+' got it right!','success');
+  if(sndOn)playSound('click');
+}
+
+function judgeWrong(){
+  if(timerInt){clearInterval(timerInt);timerInt=null;}
+  wrongCount++;
+  const name=lastBuzzInfo?lastBuzzInfo.name:'?';
+  document.getElementById('judgeBtns').style.display='none';
+
+  if(wrongCount===1){
+    // First wrong — penalize the buzzer's team or player
+    addLog('✕ '+name+' answered wrong (1st)','var(--t-secondary)');
+    showToast(name+' wrong — passing to others','warning');
+    if(lastBuzzInfo){
+      const pid=lastBuzzInfo.id;const p=host.players.get(pid);
+      if(p&&p.team){
+        // Team penalty
+        host.penalizeTarget(p.team);
+        penaltyEndTimes.set(p.team,Date.now()+penaltyDuration*1000);
+        startPenaltyTicker();
+        const t=host.teams.get(p.team);
+        addLog('⚠ '+(t?t.name:'Team')+' penalized '+penaltyDuration+'s','var(--t-orange)');
+      } else {
+        // Individual penalty
+        host.penalizeTarget(pid);
+        penaltyEndTimes.set(pid,Date.now()+penaltyDuration*1000);
+        startPenaltyTicker();
+        addLog('⚠ '+name+' penalized '+penaltyDuration+'s','var(--t-orange)');
+      }
+    }
+    // Re-arm round for remaining players
+    host.armed=true;host.locked=false;host.buzzes=[];
+    host._broadcast({type:'round_armed',timerDuration:host.timerDuration});
+    setBoxWaiting();
+    document.getElementById('boxLabel').textContent='WAITING — 2ND CHANCE';
+  } else if(wrongCount===2){
+    // Second wrong — clear ALL penalties, open to everyone
+    addLog('✕ '+name+' answered wrong (2nd) — open to all','var(--t-secondary)');
+    showToast('Both wrong — open to everyone!','info');
+    // Clear all penalties
+    for(const[,p]of host.players)p.penaltyUntil=0;
+    penaltyEndTimes.clear();
+    host._broadcast({type:'round_reset'});
+    // Brief pause then re-arm for everyone
+    host.armed=true;host.locked=false;host.buzzes=[];
+    setTimeout(()=>{
+      host._broadcast({type:'round_armed',timerDuration:host.timerDuration});
+    },200);
+    setBoxWaiting();
+    document.getElementById('boxLabel').textContent='OPEN TO ALL';
+  } else {
+    // 3rd+ wrong — just re-arm, no penalty
+    addLog('✕ '+name+' answered wrong — open again','var(--t-dim)');
+    showToast('Wrong again — still open','info');
+    host.armed=true;host.locked=false;host.buzzes=[];
+    host._broadcast({type:'round_armed',timerDuration:host.timerDuration});
+    setBoxWaiting();
+    document.getElementById('boxLabel').textContent='OPEN TO ALL';
+  }
+  if(sndOn)playSound('penalty');
+}
+function skipRound(){
+  if(timerInt){clearInterval(timerInt);timerInt=null;}
+  host.resetRound();setBoxIdle();
+  addLog('Round skipped','var(--t-dim)');
+  showToast('Round skipped','warning');
 }
 function showBuzzList(buzzes){
   if(buzzes.length>1){document.getElementById('saBtn').style.visibility='visible';document.getElementById('saBtn').textContent=(saOpen?'▲ HIDE':'▼ ALL BUZZES')+' ('+buzzes.length+')';}
@@ -362,6 +483,8 @@ function renderLobby(){
     prevPlayerIds.forEach(id=>{if(!curIds.has(id)){showToast('Player left','warning');addLog('← Player left','var(--t-secondary)');}});
   }
   prevPlayerIds=curIds;
+  // Player count badge
+  document.getElementById('playerCount').textContent=players.length+' ●';
   // Box state
   const box=document.getElementById('theBox');
   if(players.length===0){box.classList.add('disabled');document.getElementById('boxSub').textContent='Waiting for players';}
@@ -375,7 +498,7 @@ function renderLobby(){
   const teamPlayerMap={};players.forEach(p=>{if(p.team)(teamPlayerMap[p.team]=teamPlayerMap[p.team]||[]).push(p);});
   if(teams.length>0){
     grid.innerHTML=teams.map(t=>{const tp=teamPlayerMap[t.id]||[];
-      return '<div class="team-col" style="border-color:'+t.color+'25"><div class="team-hdr" style="background:'+t.color+'0C"><div class="team-title"><div class="team-dot" style="background:'+t.color+'"></div><span class="team-name" style="color:'+t.color+'">'+esc(t.name).toUpperCase()+'</span><span class="team-count">'+tp.length+'</span><span id="pen-cd-'+t.id+'" style="display:none;font-family:Bebas Neue,sans-serif;font-size:16px;color:var(--t-orange);letter-spacing:2px;margin-left:auto"></span></div><button class="team-pen" onclick="event.stopPropagation();penTeam(\''+t.id+'\')">⚠ PENALIZE</button></div><div class="team-players">'+tp.map(p=>playerRowInTeam(p)).join('')+'</div></div>';
+      return '<div class="team-col glass-target" style="border-color:'+t.color+'25"><div class="team-hdr" style="background:'+t.color+'0C"><div class="team-title"><div class="team-dot" style="background:'+t.color+'"></div><span class="team-name" style="color:'+t.color+'">'+esc(t.name).toUpperCase()+'</span><span class="team-count">'+tp.length+'</span><span id="pen-cd-'+t.id+'" style="display:none;font-family:Bebas Neue,sans-serif;font-size:16px;color:var(--t-orange);letter-spacing:2px;margin-left:auto"></span></div><button class="team-pen" onclick="event.stopPropagation();penTeam(\''+t.id+'\')">⚠ PENALIZE</button></div><div class="team-players">'+tp.map(p=>playerRowInTeam(p)).join('')+'</div></div>';
     }).join('');
   } else grid.innerHTML='';
   // Host create team visibility

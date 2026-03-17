@@ -153,7 +153,7 @@ main{position:relative;z-index:1;width:100%;max-width:480px;padding:env(safe-are
 
 <!-- Player Settings Overlay -->
 <div class="ps-overlay" id="psOverlay" onclick="closePS()"></div>
-<div class="ps-panel" id="psPanel">
+<div class="ps-panel glass-target" id="psPanel">
   <div class="ps-hd"><span class="ps-title">SETTINGS</span><button class="ps-close" onclick="closePS()">✕</button></div>
   <div class="ps-group">
     <label class="ps-toggle-row"><span>Sound effects</span><input type="checkbox" id="pSndToggle" checked onchange="pSndOn=this.checked"><span class="ps-switch"></span></label>
@@ -195,7 +195,7 @@ main{position:relative;z-index:1;width:100%;max-width:480px;padding:env(safe-are
     </section>
 
     <button class="lobby-toggle" id="lobbyToggle" onclick="toggleLobby()" aria-expanded="false" aria-controls="lobbyPanel">▼ LOBBY (0)</button>
-    <div class="lobby-panel" id="lobbyPanel" role="region" aria-label="Game lobby">
+    <div class="lobby-panel glass-target" id="lobbyPanel" role="region" aria-label="Game lobby">
       <div id="lobbyList"></div>
       <div class="team-section" id="teamSection">
         <div class="team-hd">TEAMS</div>
