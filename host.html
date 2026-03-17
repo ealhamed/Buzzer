@@ -340,7 +340,7 @@ function showFirst(msg){
   let rem=msg.timerDuration;
   document.getElementById('boxTimer').textContent=rem.toFixed(1);document.getElementById('boxTimer').style.color=msg.color;document.getElementById('boxTimer').style.opacity='1';
   if(timerInt)clearInterval(timerInt);const t0=Date.now();
-  timerInt=setInterval(()=>{rem=Math.max(0,msg.timerDuration-(Date.now()-t0)/1000);const cd=document.getElementById('boxTimer');if(cd){cd.textContent=rem.toFixed(1);if(rem<=0){clearInterval(timerInt);timerInt=null;cd.style.opacity='.25';roundState='expired';document.getElementById('boxSub').textContent='PRESS FOR NEXT ROUND';document.getElementById('theBox').className='the-box glass-target expired';if(sndOn)playSound('timeup');hapticBuzz(150);host._broadcast({type:'timer_expired'});}}},50);
+  timerInt=setInterval(()=>{rem=Math.max(0,msg.timerDuration-(Date.now()-t0)/1000);const cd=document.getElementById('boxTimer');if(cd){cd.textContent=rem.toFixed(1);if(rem<=0){clearInterval(timerInt);timerInt=null;cd.style.opacity='.25';roundState='expired';document.getElementById('boxSub').textContent='PRESS FOR NEXT ROUND';document.getElementById('theBox').className='the-box glass-target expired';if(sndOn)playSound('timeup');host._broadcast({type:'timer_expired'});}}},50);
 }
 function onBoxTap(){
   if(roundState==='idle'){if((lobbyData.players||[]).length===0)return;host.setTimer(document.getElementById('timerInput').value);host.armRound();if(sndOn)playSound('arm');setBoxWaiting();addLog('Round started','var(--t-primary)');}

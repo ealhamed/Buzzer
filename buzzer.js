@@ -22,19 +22,7 @@ function playSound(key){
   const defs={buzz:{type:'square',f0:880,f1:440,dur:.15,vol:.25},lock:{type:'sawtooth',f0:200,f1:100,dur:.2,vol:.12},click:{type:'sine',f0:660,f1:660,dur:.1,vol:.15},arm:{type:'sine',f0:520,f1:780,dur:.2,vol:.18},penalty:{type:'sawtooth',f0:150,f1:80,dur:.35,vol:.2},timeup:{type:'square',f0:330,f1:220,dur:.4,vol:.2}};
   try{const s=defs[key];if(!s)return;const c=actx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=s.type;o.frequency.setValueAtTime(s.f0,c.currentTime);o.frequency.exponentialRampToValueAtTime(Math.max(1,s.f1),c.currentTime+s.dur);g.gain.setValueAtTime(s.vol,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+s.dur+.05);o.start(c.currentTime);o.stop(c.currentTime+s.dur+.06);}catch(e){}
 }
-function hapticBuzz(ms){
-  ms=ms||80;
-  // Android vibration API
-  try{if(navigator.vibrate)navigator.vibrate([ms]);}catch(e){}
-  // iOS has no vibrate API — use AudioContext trick for subtle tactile feedback
-  try{
-    if(/iPhone|iPad|iPod/.test(navigator.userAgent)){
-      const c=actx();const o=c.createOscillator();const g=c.createGain();
-      o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=1;
-      g.gain.value=0.01;o.start(c.currentTime);o.stop(c.currentTime+ms/1000);
-    }
-  }catch(e){}
-}
+function hapticBuzz(){}
 function genCode(){return Math.random().toString(36).substring(2,6).toUpperCase();}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function lighten(hex,pct){const n=parseInt(hex.replace('#',''),16),a=Math.round(2.55*pct);return'#'+(0x1000000+Math.min(255,(n>>16)+a)*0x10000+Math.min(255,((n>>8)&0xFF)+a)*0x100+Math.min(255,(n&0xFF)+a)).toString(16).slice(1)}
