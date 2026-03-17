@@ -34,7 +34,7 @@ class BuzzerHost {
     this.teams=new Map();this.buzzes=[];this.armed=false;this.locked=false;
     this.timerDuration=3;this.colorIdx=0;this.roomCode='';this.pidCounter=0;
     this.teamsLocked=false;this._hbInterval=null;this.reconnectTokens=new Map();
-    this.theme='neon';this.roundHistory=[];this.armedAt=0;
+    this.theme='neon';this.roundHistory=[];this.armedAt=0;this.penaltySeconds=10;
     // Latency: store clock offset per player
     this.clockOffsets=new Map();
   }
@@ -155,10 +155,11 @@ class BuzzerHost {
     this._broadcast({type:'round_reset'});this.onUpdate({type:'reset'});
   }
   setTimer(s){this.timerDuration=Math.max(1,Math.min(60,parseInt(s)||3));}
+  setPenaltyDuration(s){this.penaltySeconds=Math.max(1,Math.min(60,parseInt(s)||10));}
   penalizeTeam(teamId){
-    const until=Date.now()+10000;
-    for(const[id,p]of this.players){if(p.team===teamId){p.penaltyUntil=until;const e=[...this.conns.values()].find(c=>c.playerId===id);if(e)try{e.conn.send({type:'penalty',seconds:10});}catch(ex){}}}
-    this._broadcast({type:'team_penalized',teamId,seconds:10});this.onUpdate({type:'team_penalized',teamId});
+    const secs=this.penaltySeconds||10;const until=Date.now()+secs*1000;
+    for(const[id,p]of this.players){if(p.team===teamId){p.penaltyUntil=until;const e=[...this.conns.values()].find(c=>c.playerId===id);if(e)try{e.conn.send({type:'penalty',seconds:secs});}catch(ex){}}}
+    this._broadcast({type:'team_penalized',teamId,seconds:secs});this.onUpdate({type:'team_penalized',teamId});
   }
   kickPlayer(id){
     const p=this.players.get(id);if(!p)return;

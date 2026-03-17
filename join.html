@@ -27,6 +27,11 @@ main{position:relative;z-index:1;width:100%;max-width:480px;padding:env(safe-are
 .hbar-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(20px,5vw,24px);letter-spacing:4px;padding-right:4px;background:var(--t-logo-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 #stdLogo{display:block}
 #aldewaniahLogo{display:none;height:28px;object-fit:contain}
+.share-btn{font-family:'Barlow',sans-serif;font-size:13px;font-weight:800;padding:8px 14px;border:1px solid var(--t-bdr);background:var(--t-s2);color:var(--t-dim);border-radius:10px;cursor:pointer;margin-left:auto;min-height:40px;letter-spacing:1px;white-space:nowrap}
+.share-btn:hover{border-color:var(--t-primary);color:var(--t-primary)}
+.player-qr{text-align:center;margin-top:6px;padding:12px;background:var(--t-card-bg);border:1px solid var(--t-card-bdr);border-radius:12px;display:none}
+.player-qr canvas{border-radius:8px}
+.player-qr-label{font-size:12px;color:var(--t-dim);margin-top:6px;font-weight:700;letter-spacing:1px}
 
 /* Join form */
 .jcard{background:var(--t-card-bg);border:1px solid var(--t-card-bdr);border-radius:18px;padding:clamp(24px,6vw,36px) clamp(20px,5vw,28px);margin:auto 0}
@@ -117,6 +122,7 @@ main{position:relative;z-index:1;width:100%;max-width:480px;padding:env(safe-are
       <a href="index.html" class="back-btn" aria-label="Back to home">←</a>
       <div class="hbar-logo" id="stdLogo">BUZZER</div>
       <img id="aldewaniahLogo" src="aldewaniah-logo.png" alt="الديوانية" style="display:none;height:28px;object-fit:contain">
+      <button class="share-btn" id="shareBtn" onclick="shareRoom()" style="display:none" aria-label="Share room">📤 SHARE</button>
     </div>
   </header>
 
@@ -169,10 +175,16 @@ main{position:relative;z-index:1;width:100%;max-width:480px;padding:env(safe-are
 <script>
 let player=null,state='idle',myColor='#00E5FF',myTeam=null;
 let lobbyOpen=false,teamsData=[],playersData=[],teamsLocked=false;
-let penaltyTimer=null,selColorIdx=0;
+let penaltyTimer=null,selColorIdx=0,currentRoomCode='';
 const TEAM_COLORS=[{name:'Crimson',hex:'#FF3E6C'},{name:'Cyan',hex:'#00E5FF'},{name:'Lime',hex:'#76FF03'},{name:'Amber',hex:'#FFD600'}];
 const params=new URLSearchParams(location.search);
-if(params.get('room'))document.getElementById('inpCode').value=params.get('room');
+// Auto-remember: URL param > localStorage > empty
+const urlRoom=params.get('room')||'';
+const savedRoom=localStorage.getItem('bzr_last_room')||'';
+const savedName=localStorage.getItem('bzr_last_name')||'';
+if(urlRoom)document.getElementById('inpCode').value=urlRoom;
+else if(savedRoom)document.getElementById('inpCode').value=savedRoom;
+if(savedName)document.getElementById('inpName').value=savedName;
 function renderColorPicks(){document.getElementById('ctColors').innerHTML=TEAM_COLORS.map((c,i)=>'<div class="ct-color '+(i===selColorIdx?'sel':'')+'" style="background:'+c.hex+'" onclick="selColorIdx='+i+';renderColorPicks()" tabindex="0" role="radio" aria-checked="'+(i===selColorIdx)+'" aria-label="'+c.name+'"></div>').join('');}
 renderColorPicks();
 
@@ -186,6 +198,10 @@ function doJoin(){
   const code=document.getElementById('inpCode').value.trim().toUpperCase();
   if(!name){document.getElementById('errMsg').textContent='Enter your name';return;}
   if(!code||code.length!==4){document.getElementById('errMsg').textContent='Enter 4-character room code';return;}
+  // Save for auto-remember
+  localStorage.setItem('bzr_last_room',code);
+  localStorage.setItem('bzr_last_name',name);
+  currentRoomCode=code;
   const btn=document.getElementById('btnJoin');btn.disabled=true;btn.textContent='CONNECTING…';
   document.getElementById('errMsg').textContent='';
   player=new BuzzerPlayer(onPlayerUpdate);
@@ -193,6 +209,8 @@ function doJoin(){
     myColor=info.color;if(info.teams)teamsData=info.teams;if(info.teamsLocked!=null)teamsLocked=info.teamsLocked;
     if(info.rejoined&&info.team)myTeam=info.team;if(info.theme)applyTheme(info.theme);
     showBuzzer(info.name,info.color);
+    // Show share button
+    document.getElementById('shareBtn').style.display='flex';
   }).catch(e=>{document.getElementById('errMsg').textContent=e.message||'Failed';btn.disabled=false;btn.textContent='JOIN';});
 }
 function showBuzzer(name,color){
@@ -265,6 +283,17 @@ function cancelRename(){
   document.getElementById('pName').style.display='block';
 }
 document.getElementById('renameInp').addEventListener('keyup',e=>{if(e.key==='Enter')confirmRename();if(e.key==='Escape')cancelRename();});
+
+// Share room
+function shareRoom(){
+  const url=window.location.href.split('?')[0]+'?room='+currentRoomCode;
+  const shareData={title:'BUZZER — Join my game!',text:'Join room '+currentRoomCode+' on BUZZER!',url:url};
+  if(navigator.share){
+    navigator.share(shareData).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(url).then(()=>{showToast('Link copied!','success');}).catch(()=>{showToast('Copy this: '+url,'info');});
+  }
+}
 
 document.getElementById('inpName').addEventListener('keyup',e=>{if(e.key==='Enter')document.getElementById('inpCode').focus();});
 document.getElementById('ctName').addEventListener('keyup',e=>{if(e.key==='Enter')createTeam();});
