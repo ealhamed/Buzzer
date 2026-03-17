@@ -4,47 +4,49 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#06060C">
 <link rel="manifest" href="manifest.json">
 <title>BUZZER</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
-body{font-family:'DM Sans',sans-serif;font-weight:700;background:#06060C;color:#F0F0F8;display:flex;align-items:center;justify-content:center}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 30% 10%,rgba(0,229,255,.08) 0%,transparent 55%),radial-gradient(ellipse at 70% 90%,rgba(255,62,108,.06) 0%,transparent 55%);pointer-events:none}
+body{font-family:'Barlow',sans-serif;font-weight:700;background:#06060C;color:#E8E8F0;display:flex;align-items:center;justify-content:center;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 25% 15%,rgba(0,229,255,.06) 0%,transparent 55%),radial-gradient(ellipse at 75% 85%,rgba(255,62,108,.04) 0%,transparent 55%);pointer-events:none}
 main{position:relative;z-index:1;text-align:center;padding:24px;width:100%;max-width:460px}
-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,20vw,120px);letter-spacing:clamp(8px,3vw,20px);line-height:.9;background:linear-gradient(135deg,#00E5FF 0%,#76FF03 40%,#FF3E6C 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;padding-right:clamp(8px,3vw,20px)}
-.tag{font-size:clamp(13px,3.5vw,16px);font-weight:600;color:#8888A0;letter-spacing:4px;text-transform:uppercase;margin:8px 0 clamp(40px,10vw,64px)}
-nav{display:flex;flex-direction:column;gap:14px}
-.btn{display:block;text-decoration:none;font-family:'DM Sans',sans-serif;font-size:clamp(16px,4.5vw,20px);font-weight:800;letter-spacing:3px;padding:clamp(18px,5vw,24px);border-radius:16px;text-transform:uppercase;transition:all .2s cubic-bezier(.34,1.56,.64,1);text-align:center;-webkit-tap-highlight-color:transparent}
-.btn:active{transform:scale(.96)}
-.btn-h{border:3px solid #00E5FF;color:#00E5FF;background:rgba(0,229,255,.04)}
-.btn-h:hover,.btn-h:focus-visible{background:#00E5FF;color:#06060C;outline:none}
-.btn-j{border:3px solid #FF3E6C;color:#FF3E6C;background:rgba(255,62,108,.04)}
-.btn-j:hover,.btn-j:focus-visible{background:#FF3E6C;color:#06060C;outline:none}
-footer{margin-top:clamp(40px,10vw,64px);font-size:13px;font-weight:600;color:#8888A0;letter-spacing:2px;text-transform:uppercase;line-height:2}
-.pwa-btn{display:none;margin-top:16px;font-size:14px;font-weight:700;padding:12px 20px;border:2px solid #333;background:transparent;color:#8888A0;border-radius:12px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all .2s}
-.pwa-btn:hover{border-color:#555;color:#ccc}
-main>*{opacity:0;transform:translateY(20px);animation:up .5s ease forwards}
-main>:nth-child(1){animation-delay:.05s}main>:nth-child(2){animation-delay:.15s}main>:nth-child(3){animation-delay:.25s}main>:nth-child(4){animation-delay:.4s}
-@keyframes up{to{opacity:1;transform:translateY(0)}}
+h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,16vw,88px);letter-spacing:clamp(10px,3vw,18px);padding-right:18px;background:linear-gradient(135deg,#00E5FF 0%,#76FF03 40%,#FF3E6C 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:glow 4s ease-in-out infinite alternate;line-height:1}
+@keyframes glow{0%{filter:brightness(1) drop-shadow(0 0 8px rgba(0,229,255,.3))}100%{filter:brightness(1.1) drop-shadow(0 0 16px rgba(255,62,108,.3))}}
+.tag{font-family:'Bebas Neue',sans-serif;font-size:clamp(14px,3.5vw,18px);color:#9090A8;letter-spacing:8px;margin:6px 0 clamp(40px,10vw,60px)}
+nav{display:flex;flex-direction:column;gap:16px}
+.b{display:block;text-decoration:none;font-family:'Bebas Neue',sans-serif;font-size:clamp(20px,5vw,26px);letter-spacing:6px;padding:clamp(18px,4.5vw,24px);border-radius:16px;text-align:center;transition:all .3s cubic-bezier(.34,1.56,.64,1);min-height:60px;display:flex;align-items:center;justify-content:center}
+.bh{border:2px solid #00E5FF;color:#00E5FF;background:rgba(0,229,255,.04)}
+.bh:hover,.bh:focus-visible{background:#00E5FF;color:#06060C;transform:scale(1.03);outline:none}
+.bj{border:2px solid #FF3E6C;color:#FF3E6C;background:rgba(255,62,108,.04)}
+.bj:hover,.bj:focus-visible{background:#FF3E6C;color:#06060C;transform:scale(1.03);outline:none}
+footer{margin-top:clamp(40px,10vw,60px);font-size:clamp(12px,3vw,14px);color:#8888A0;letter-spacing:3px;line-height:2;font-weight:800}
+.install-btn{display:none;margin-top:16px;font-family:'Barlow',sans-serif;font-size:15px;font-weight:800;letter-spacing:1px;padding:12px 24px;border:1px solid #444;background:rgba(255,255,255,.04);color:#9090A8;border-radius:12px;cursor:pointer;min-height:48px}
+.install-btn:hover{border-color:#666;color:#ccc}
+main>*{opacity:0;transform:translateY(16px);animation:fu .6s ease forwards}
+main>*:nth-child(1){animation-delay:.1s}main>*:nth-child(2){animation-delay:.2s}main>*:nth-child(3){animation-delay:.35s}main>*:nth-child(4){animation-delay:.55s}
+@keyframes fu{to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 <main>
   <h1>BUZZER</h1>
-  <p class="tag">Real-time game buzzer</p>
-  <nav aria-label="Main navigation">
-    <a href="host.html" class="btn btn-h" role="button">Host Game</a>
-    <a href="join.html" class="btn btn-j" role="button">Join Game</a>
-    <button class="pwa-btn" id="installBtn" onclick="installPWA()" aria-label="Install app">Install App</button>
+  <p class="tag">REAL-TIME GAME BUZZER</p>
+  <nav aria-label="Main">
+    <a href="host.html" class="b bh" role="button">⚡ HOST GAME</a>
+    <a href="join.html" class="b bj" role="button">🎮 JOIN GAME</a>
+    <button class="install-btn" id="installBtn" onclick="installPWA()" aria-label="Install app">📲 INSTALL APP</button>
   </nav>
-  <footer>Peer-to-Peer · Up to 16 Players<br>Teams · Themes · Reconnect</footer>
+  <footer>PEER-TO-PEER · UP TO 16 PLAYERS<br>TEAMS · 4 THEMES · LATENCY CORRECTION</footer>
 </main>
 <script>
-let dp;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;document.getElementById('installBtn').style.display='block';});
-function installPWA(){if(!dp)return;dp.prompt();dp.userChoice.then(()=>{dp=null;document.getElementById('installBtn').style.display='none';});}
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('installBtn').style.display='block';});
+function installPWA(){if(!deferredPrompt)return;deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('installBtn').style.display='none';});}
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>

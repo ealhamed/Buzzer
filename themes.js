@@ -1,11 +1,9 @@
-/* BUZZER — Theme System
-   Host switches theme → broadcast to all players.
-   Themes are CSS custom properties applied to :root.
+/* BUZZER — Theme System v4
+   Thrill (neon), Posh (gold+navy), Glass (glassmorphism), الديوانية
 */
-
 const THEMES = {
-  neon: {
-    name: 'Neon',
+  thrill: {
+    name: 'Thrill',
     vars: {
       '--t-bg':'#06060C','--t-s1':'#0E0E18','--t-s2':'#161624','--t-bdr':'#222236',
       '--t-txt':'#E0E0F0','--t-dim':'#8888A0','--t-primary':'#00E5FF','--t-secondary':'#FF3E6C',
@@ -19,8 +17,8 @@ const THEMES = {
       '--t-mode':'dark'
     }
   },
-  gold: {
-    name: 'Gold & Navy',
+  posh: {
+    name: 'Posh',
     vars: {
       '--t-bg':'#0B1120','--t-s1':'#111B33','--t-s2':'#182444','--t-bdr':'#243050',
       '--t-txt':'#E8E4D8','--t-dim':'#8090A8','--t-primary':'#D4A853','--t-secondary':'#C0392B',
@@ -34,18 +32,18 @@ const THEMES = {
       '--t-mode':'dark'
     }
   },
-  purple: {
-    name: 'Electric Purple',
+  glass: {
+    name: 'Glass',
     vars: {
-      '--t-bg':'#100818','--t-s1':'#1A0E28','--t-s2':'#221438','--t-bdr':'#351D55',
-      '--t-txt':'#F0E8FF','--t-dim':'#9080B0','--t-primary':'#BF5AF2','--t-secondary':'#FF2D78',
-      '--t-green':'#30D5C8','--t-yellow':'#FFD166','--t-orange':'#FF6B6B',
-      '--t-btn-start-bg':'linear-gradient(135deg,#BF5AF2,#9B30FF)','--t-btn-start-c':'#ffffff',
-      '--t-btn-reset-bg':'linear-gradient(135deg,#FF2D78,#D81B60)','--t-btn-reset-c':'#ffffff',
-      '--t-card-bg':'#1A0E28','--t-card-bdr':'#351D55','--t-input-bg':'#100818',
-      '--t-buzz-glow':'1','--t-logo-grad':'linear-gradient(135deg,#BF5AF2,#FF2D78)',
-      '--t-lock-color':'#30D5C8','--t-lock-bg':'rgba(48,213,200,0.06)','--t-lock-bdr':'rgba(48,213,200,0.3)',
-      '--t-penalty-color':'#FF6B6B','--t-penalty-bg':'rgba(255,107,107,0.06)','--t-penalty-bdr':'rgba(255,107,107,0.25)',
+      '--t-bg':'#0a0b10','--t-s1':'rgba(22,25,37,0.5)','--t-s2':'rgba(30,34,50,0.45)','--t-bdr':'rgba(255,255,255,0.1)',
+      '--t-txt':'#FFFFFF','--t-dim':'#a0a5b5','--t-primary':'#00f0ff','--t-secondary':'#ff0055',
+      '--t-green':'#00ff66','--t-yellow':'#ffaa00','--t-orange':'#ff6633',
+      '--t-btn-start-bg':'linear-gradient(135deg,#00f0ff,#00c4cc)','--t-btn-start-c':'#0a0b10',
+      '--t-btn-reset-bg':'linear-gradient(135deg,#ffaa00,#cc8800)','--t-btn-reset-c':'#0a0b10',
+      '--t-card-bg':'rgba(22,25,37,0.5)','--t-card-bdr':'rgba(255,255,255,0.1)','--t-input-bg':'rgba(15,17,25,0.6)',
+      '--t-buzz-glow':'1','--t-logo-grad':'linear-gradient(135deg,#00f0ff,#00ff66)',
+      '--t-lock-color':'#00ff66','--t-lock-bg':'rgba(0,255,102,0.06)','--t-lock-bdr':'rgba(0,255,102,0.2)',
+      '--t-penalty-color':'#ff6633','--t-penalty-bg':'rgba(255,102,51,0.06)','--t-penalty-bdr':'rgba(255,102,51,0.2)',
       '--t-mode':'dark'
     }
   },
@@ -66,23 +64,44 @@ const THEMES = {
   }
 };
 
-let _currentTheme = 'neon';
+let _currentTheme = 'thrill';
 
 function applyTheme(themeId) {
   const theme = THEMES[themeId];
   if (!theme) return;
   _currentTheme = themeId;
   const root = document.documentElement;
-  for (const [k, v] of Object.entries(theme.vars)) {
-    root.style.setProperty(k, v);
-  }
-  // Toggle aldewaniah logo visibility
+  for (const [k, v] of Object.entries(theme.vars)) root.style.setProperty(k, v);
+  // Aldewaniah logo toggle
   const alLogo = document.getElementById('aldewaniahLogo');
   if (alLogo) alLogo.style.display = (themeId === 'aldewaniah') ? 'block' : 'none';
-  // Toggle standard logo
   const stdLogo = document.getElementById('stdLogo');
   if (stdLogo) stdLogo.style.display = (themeId === 'aldewaniah') ? 'none' : 'block';
+  // Glass backdrop-filter
+  const isGlass = themeId === 'glass';
+  document.querySelectorAll('.glass-target').forEach(el => {
+    el.style.backdropFilter = isGlass ? 'blur(20px)' : 'none';
+    el.style.webkitBackdropFilter = isGlass ? 'blur(20px)' : 'none';
+  });
 }
 
 function getCurrentTheme() { return _currentTheme; }
 function getThemeList() { return Object.entries(THEMES).map(([id, t]) => ({ id, name: t.name })); }
+
+/* Toast notification system */
+let _toastBox = null;
+function showToast(msg, type) {
+  if (!_toastBox) {
+    _toastBox = document.createElement('div');
+    _toastBox.style.cssText = 'position:fixed;top:env(safe-area-inset-top,12px);left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;width:92%;max-width:420px';
+    document.body.appendChild(_toastBox);
+  }
+  const cols = { info:'var(--t-primary)', success:'var(--t-green)', warning:'var(--t-orange)', error:'var(--t-secondary)' };
+  const bg = cols[type] || cols.info;
+  const t = document.createElement('div');
+  t.style.cssText = 'padding:10px 18px;border-radius:12px;font-family:Barlow,sans-serif;font-size:14px;font-weight:800;letter-spacing:.5px;opacity:0;transform:translateY(-12px);transition:all .3s ease;pointer-events:auto;text-align:center;width:100%;color:#000;background:'+bg;
+  t.textContent = msg;
+  _toastBox.appendChild(t);
+  requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateY(0)'; });
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(-12px)'; setTimeout(() => t.remove(), 300); }, 2800);
+}
