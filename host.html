@@ -133,7 +133,7 @@ main{position:relative;z-index:1;padding:env(safe-area-inset-top,8px) 12px env(s
 
   <div class="sp-group">
     <div class="sp-label">ANSWER TIMER</div>
-    <div class="sp-row"><label>Duration</label><input class="sp-input" id="timerInput" type="number" min="1" max="60" value="3" onchange="onTimerChange(this.value)"><span class="sp-unit">SEC</span></div>
+    <div class="sp-row"><label>Duration</label><input class="sp-input" id="timerInput" type="number" min="1" max="60" value="5" onchange="onTimerChange(this.value)"><span class="sp-unit">SEC</span></div>
   </div>
 
   <div class="sp-group">
@@ -159,7 +159,7 @@ main{position:relative;z-index:1;padding:env(safe-area-inset-top,8px) 12px env(s
         <div class="hbar-logo" id="stdLogo">BUZZER</div>
         <img id="aldewaniahLogo" src="aldewaniah-logo.png" alt="الديوانية" style="display:none;height:34px;object-fit:contain">
         <div class="hbar-code" id="rcCode"></div>
-        <button class="icon-btn" onclick="openQR()" title="QR Code">⊞</button>
+        <button class="icon-btn" onclick="openQR()" title="Share Room"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
         <button class="icon-btn" onclick="openSP()" title="Settings">⚙</button>
       </div>
     </header>
@@ -262,6 +262,8 @@ function showGame(code){
   new QRCode(qb,{text:url,width:190,height:190,colorDark:'#00E5FF',colorLight:'#06060C',correctLevel:QRCode.CorrectLevel.M});
   setBoxIdle();
   addLog('Room '+code+' created','var(--t-primary)');
+  // Auto-show QR for sharing
+  openQR();
 }
 
 function onHostUpdate(msg){
@@ -309,7 +311,7 @@ function showFirst(msg){
   let rem=msg.timerDuration;
   document.getElementById('boxTimer').textContent=rem.toFixed(1);document.getElementById('boxTimer').style.color=msg.color;document.getElementById('boxTimer').style.opacity='1';
   if(timerInt)clearInterval(timerInt);const t0=Date.now();
-  timerInt=setInterval(()=>{rem=Math.max(0,msg.timerDuration-(Date.now()-t0)/1000);const cd=document.getElementById('boxTimer');if(cd){cd.textContent=rem.toFixed(1);if(rem<=0){clearInterval(timerInt);timerInt=null;cd.style.opacity='.25';roundState='expired';document.getElementById('boxSub').textContent='PRESS FOR NEXT ROUND';document.getElementById('theBox').className='the-box glass-target expired';}}},50);
+  timerInt=setInterval(()=>{rem=Math.max(0,msg.timerDuration-(Date.now()-t0)/1000);const cd=document.getElementById('boxTimer');if(cd){cd.textContent=rem.toFixed(1);if(rem<=0){clearInterval(timerInt);timerInt=null;cd.style.opacity='.25';roundState='expired';document.getElementById('boxSub').textContent='PRESS FOR NEXT ROUND';document.getElementById('theBox').className='the-box glass-target expired';if(sndOn)playSound('timeup');hapticBuzz(150);host._broadcast({type:'timer_expired'});}}},50);
 }
 function onBoxTap(){
   if(roundState==='idle'){if((lobbyData.players||[]).length===0)return;host.setTimer(document.getElementById('timerInput').value);host.armRound();if(sndOn)playSound('arm');setBoxWaiting();addLog('Round started','var(--t-primary)');}
@@ -355,14 +357,20 @@ function renderLobby(){
   else ntBox.style.display='none';
 }
 function playerRowInTeam(p){
-  return '<div class="tp" style="opacity:'+(p.idle?.4:1)+'"><div class="tp-dot" style="background:'+p.color+'"></div><span class="tp-name">'+esc(p.name)+'</span>'+(p.idle?'<span class="tp-idle">IDLE</span>':'')+'<button class="tp-kick" onclick="event.stopPropagation();kickP(\''+p.id+'\')">KICK</button></div>';
+  const otherTeams=lobbyData.teams.filter(t=>t.id!==p.team);
+  const moveOpts=otherTeams.map(t=>'<option value="'+t.id+'">→ '+esc(t.name)+'</option>').join('');
+  const moveHtml=(otherTeams.length>0)?'<select class="tp-assign" onchange="moveP(\''+p.id+'\',this.value)"><option value="">Move…</option><option value="_none">Unassign</option>'+moveOpts+'</select>':'';
+  return '<div class="tp" style="opacity:'+(p.idle?.4:1)+'"><div class="tp-dot" style="background:'+p.color+'"></div><span class="tp-name">'+esc(p.name)+'</span>'+(p.idle?'<span class="tp-idle">IDLE</span>':'')+moveHtml+'<button class="tp-kick" onclick="event.stopPropagation();kickP(\''+p.id+'\')">KICK</button></div>';
 }
 function playerRowUnassigned(p){
   const opts=lobbyData.teams.map(t=>'<option value="'+t.id+'">'+esc(t.name)+'</option>').join('');
-  return '<div class="tp" style="opacity:'+(p.idle?.4:1)+'"><div class="tp-dot" style="background:'+p.color+'"></div><span class="tp-name">'+esc(p.name)+'</span>'+(p.idle?'<span class="tp-idle">IDLE</span>':'')+(lobbyData.teams.length>0&&!lobbyData.teamsLocked?'<select class="tp-assign" onchange="assignPlayer(\''+p.id+'\',this.value)"><option value="">Assign…</option>'+opts+'</select>':'')+'<button class="tp-kick" onclick="event.stopPropagation();kickP(\''+p.id+'\')">KICK</button></div>';
+  const hasTeams=lobbyData.teams.length>0;
+  return '<div class="tp" style="opacity:'+(p.idle?.4:1)+'"><div class="tp-dot" style="background:'+p.color+'"></div><span class="tp-name">'+esc(p.name)+'</span>'+(p.idle?'<span class="tp-idle">IDLE</span>':'')+(hasTeams?'<select class="tp-assign" onchange="assignPlayer(\''+p.id+'\',this.value)"><option value="">Assign…</option>'+opts+'</select>':'')+'<button class="tp-kick" onclick="event.stopPropagation();penPlayer(\''+p.id+'\')" style="color:var(--t-orange)">⚠</button><button class="tp-kick" onclick="event.stopPropagation();kickP(\''+p.id+'\')">KICK</button></div>';
 }
 function toggleLock(){if(lobbyData.teamsLocked)host.unlockTeams();else host.lockTeams();addLog(lobbyData.teamsLocked?'Teams unlocked':'Teams locked','var(--t-primary)');}
-function penTeam(tid){host.penalizeTeam(tid);const t=lobbyData.teams.find(t=>t.id===tid);showToast((t?t.name:'Team')+' penalized','warning');}
+function penTeam(tid){host.penalizeTeam(tid);const t=lobbyData.teams.find(t=>t.id===tid);showToast((t?t.name:'Team')+' penalized','warning');addLog('⚠ '+(t?t.name:'Team')+' penalized','var(--t-orange)');}
+function penPlayer(pid){host.penalizePlayer(pid);const p=lobbyData.players.find(p=>p.id===pid);showToast((p?p.name:'Player')+' penalized','warning');addLog('⚠ '+(p?p.name:'Player')+' penalized','var(--t-orange)');}
+function moveP(pid,tid){if(tid==='_none')tid=null;host.movePlayer(pid,tid);const p=host.players.get(pid);const t=tid?host.teams.get(tid):null;addLog((p?p.name:'Player')+' → '+(t?t.name:'Unassigned'),t?t.color:'var(--t-dim)');}
 function kickP(pid){const p=lobbyData.players.find(p=>p.id===pid);host.kickPlayer(pid);if(p)addLog('✕ '+p.name+' kicked','var(--t-secondary)');showToast('Player kicked','error');}
 function onTimerChange(v){host.setTimer(v);}
 function onPenaltyChange(v){penaltyDuration=Math.max(1,Math.min(60,parseInt(v)||10));if(host)host.setPenaltyDuration(penaltyDuration);}

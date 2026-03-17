@@ -19,7 +19,7 @@ const PLAYER_COLORS = [
 let _actx;
 function actx(){if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();return _actx;}
 function playSound(key){
-  const defs={buzz:{type:'square',f0:880,f1:440,dur:.15,vol:.25},lock:{type:'sawtooth',f0:200,f1:100,dur:.2,vol:.12},click:{type:'sine',f0:660,f1:660,dur:.1,vol:.15},arm:{type:'sine',f0:520,f1:780,dur:.2,vol:.18},penalty:{type:'sawtooth',f0:150,f1:80,dur:.35,vol:.2}};
+  const defs={buzz:{type:'square',f0:880,f1:440,dur:.15,vol:.25},lock:{type:'sawtooth',f0:200,f1:100,dur:.2,vol:.12},click:{type:'sine',f0:660,f1:660,dur:.1,vol:.15},arm:{type:'sine',f0:520,f1:780,dur:.2,vol:.18},penalty:{type:'sawtooth',f0:150,f1:80,dur:.35,vol:.2},timeup:{type:'square',f0:330,f1:220,dur:.4,vol:.2}};
   try{const s=defs[key];if(!s)return;const c=actx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=s.type;o.frequency.setValueAtTime(s.f0,c.currentTime);o.frequency.exponentialRampToValueAtTime(Math.max(1,s.f1),c.currentTime+s.dur);g.gain.setValueAtTime(s.vol,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+s.dur+.05);o.start(c.currentTime);o.stop(c.currentTime+s.dur+.06);}catch(e){}
 }
 function hapticBuzz(ms){try{if(navigator.vibrate)navigator.vibrate(ms||80);}catch(e){}}
@@ -32,7 +32,7 @@ class BuzzerHost {
   constructor(onUpdate){
     this.onUpdate=onUpdate;this.peer=null;this.conns=new Map();this.players=new Map();
     this.teams=new Map();this.buzzes=[];this.armed=false;this.locked=false;
-    this.timerDuration=3;this.colorIdx=0;this.roomCode='';this.pidCounter=0;
+    this.timerDuration=5;this.colorIdx=0;this.roomCode='';this.pidCounter=0;
     this.teamsLocked=false;this._hbInterval=null;this.reconnectTokens=new Map();
     this.theme='neon';this.roundHistory=[];this.armedAt=0;this.penaltySeconds=10;
     // Latency: store clock offset per player
@@ -154,12 +154,29 @@ class BuzzerHost {
     for(const[,p]of this.players)p.penaltyUntil=0;
     this._broadcast({type:'round_reset'});this.onUpdate({type:'reset'});
   }
-  setTimer(s){this.timerDuration=Math.max(1,Math.min(60,parseInt(s)||3));}
+  setTimer(s){this.timerDuration=Math.max(1,Math.min(60,parseInt(s)||5));}
   setPenaltyDuration(s){this.penaltySeconds=Math.max(1,Math.min(60,parseInt(s)||10));}
-  penalizeTeam(teamId){
+  penalizeTarget(targetId){
+    // If targetId is a team, penalize all team members. If it's a player, penalize just that player.
     const secs=this.penaltySeconds||10;const until=Date.now()+secs*1000;
-    for(const[id,p]of this.players){if(p.team===teamId){p.penaltyUntil=until;const e=[...this.conns.values()].find(c=>c.playerId===id);if(e)try{e.conn.send({type:'penalty',seconds:secs});}catch(ex){}}}
-    this._broadcast({type:'team_penalized',teamId,seconds:secs});this.onUpdate({type:'team_penalized',teamId});
+    if(this.teams.has(targetId)){
+      // Team penalty
+      for(const[id,p]of this.players){if(p.team===targetId){p.penaltyUntil=until;const e=[...this.conns.values()].find(c=>c.playerId===id);if(e)try{e.conn.send({type:'penalty',seconds:secs});}catch(ex){}}}
+      this._broadcast({type:'team_penalized',teamId:targetId,seconds:secs});this.onUpdate({type:'team_penalized',teamId:targetId});
+    } else if(this.players.has(targetId)){
+      // Individual penalty
+      const p=this.players.get(targetId);p.penaltyUntil=until;
+      const e=[...this.conns.values()].find(c=>c.playerId===targetId);
+      if(e)try{e.conn.send({type:'penalty',seconds:secs});}catch(ex){}
+      this._broadcast({type:'player_penalized',playerId:targetId,seconds:secs});this.onUpdate({type:'player_penalized',playerId:targetId});
+    }
+  }
+  // Keep old method name for backward compat
+  penalizeTeam(teamId){this.penalizeTarget(teamId);}
+  penalizePlayer(playerId){this.penalizeTarget(playerId);}
+  movePlayer(playerId,teamId){
+    const p=this.players.get(playerId);if(!p)return;
+    p.team=teamId||null;this._broadcastLobby();
   }
   kickPlayer(id){
     const p=this.players.get(id);if(!p)return;
