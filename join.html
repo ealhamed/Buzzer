@@ -290,6 +290,7 @@ function showBuzzer(name,color){
 function onPlayerUpdate(msg){
   switch(msg.type){
     case'round_armed':setArmed();break;case'round_reset':setIdle();break;
+    case'clear_all_penalties':if(penaltyTimer){clearInterval(penaltyTimer);penaltyTimer=null;}state='idle';break;
     case'first_buzz':if(state==='armed'){pSound('lock');setLocked(msg.name,msg.color,msg.team);}break;
     case'buzz_confirmed':pSound('click');setBuzzed(msg.order,msg.gap);break;
     case'penalty':setPenalty(msg.seconds);break;case'penalty_active':setPenalty(msg.remaining);break;

@@ -27,7 +27,8 @@ main{position:relative;z-index:1;padding:env(safe-area-inset-top,8px) 12px env(s
 .back-btn:hover,.back-btn:focus-visible,.icon-btn:hover,.icon-btn:focus-visible{border-color:var(--t-primary);color:var(--t-primary);outline:none}
 .hbar-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(22px,6vw,28px);letter-spacing:5px;padding-right:5px;background:var(--t-logo-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .hbar-code{margin-left:auto;font-family:'Bebas Neue',sans-serif;font-size:clamp(22px,6vw,28px);color:var(--t-primary);letter-spacing:6px}
-.player-count{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--t-dim);background:var(--t-s2);border:1px solid var(--t-bdr);border-radius:8px;padding:4px 10px;letter-spacing:1px;min-height:30px;display:flex;align-items:center}
+.player-count{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--t-dim);background:var(--t-s2);border:1px solid var(--t-bdr);border-radius:8px;padding:4px 10px;letter-spacing:1px;min-height:30px;display:flex;align-items:center;gap:4px}
+.player-count svg{flex-shrink:0}
 .snd-badge{position:fixed;top:env(safe-area-inset-top,8px);right:10px;font-size:13px;font-weight:700;color:var(--t-dim);background:var(--t-s1);border:1px solid var(--t-bdr);padding:6px 12px;border-radius:20px;z-index:100;cursor:pointer;transition:all .2s;min-height:36px;display:flex;align-items:center}
 .snd-badge:hover{border-color:var(--t-primary)}
 /* QR Overlay */
@@ -171,7 +172,7 @@ main{position:relative;z-index:1;padding:env(safe-area-inset-top,8px) 12px env(s
         <div class="hbar-logo" id="stdLogo">BUZZER</div>
         <img id="aldewaniahLogo" src="aldewaniah-logo.png" alt="الديوانية" style="display:none;height:34px;object-fit:contain">
         <div class="hbar-code" id="rcCode"></div>
-        <div class="player-count" id="playerCount">0</div>
+        <div class="player-count" id="playerCount"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 0</div>
         <button class="icon-btn" onclick="openQR()" title="Share Room"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
         <button class="icon-btn" onclick="openSP()" title="Settings">⚙</button>
       </div>
@@ -439,15 +440,19 @@ function judgeWrong(){
     // Second wrong — clear ALL penalties, open to everyone
     addLog('✕ '+name+' answered wrong (2nd) — open to all','var(--t-secondary)');
     showToast('Both wrong — open to everyone!','info');
-    // Clear all penalties
+    // Clear all penalties on engine
     for(const[,p]of host.players)p.penaltyUntil=0;
     penaltyEndTimes.clear();
-    host._broadcast({type:'round_reset'});
-    // Brief pause then re-arm for everyone
-    host.armed=true;host.locked=false;host.buzzes=[];
+    // Tell players to clear their local penalty timers FIRST
+    host._broadcast({type:'clear_all_penalties'});
+    // Then reset and re-arm with delays so players process in order
     setTimeout(()=>{
-      host._broadcast({type:'round_armed',timerDuration:host.timerDuration});
-    },200);
+      host._broadcast({type:'round_reset'});
+      host.armed=true;host.locked=false;host.buzzes=[];
+      setTimeout(()=>{
+        host._broadcast({type:'round_armed',timerDuration:host.timerDuration});
+      },150);
+    },100);
     setBoxWaiting();
     document.getElementById('boxLabel').textContent='OPEN TO ALL';
   } else {
@@ -484,7 +489,7 @@ function renderLobby(){
   }
   prevPlayerIds=curIds;
   // Player count badge
-  document.getElementById('playerCount').textContent=players.length+' ●';
+  document.getElementById('playerCount').innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> '+players.length;
   // Box state
   const box=document.getElementById('theBox');
   if(players.length===0){box.classList.add('disabled');document.getElementById('boxSub').textContent='Waiting for players';}
