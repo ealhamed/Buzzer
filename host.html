@@ -36,6 +36,9 @@ main{position:relative;z-index:1;padding:env(safe-area-inset-top,8px) 12px env(s
 .qr-url{font-size:13px;color:var(--t-dim);word-break:break-all;padding:10px;background:var(--t-bg);border-radius:8px;margin-top:12px;font-family:monospace;font-weight:600;max-width:320px}
 .qr-close{margin-top:20px;font-family:'Bebas Neue',sans-serif;font-size:18px;padding:14px 40px;border:1px solid var(--t-bdr);background:transparent;color:var(--t-dim);border-radius:12px;cursor:pointer;letter-spacing:3px;min-height:48px}
 .qr-close:hover{border-color:var(--t-primary);color:var(--t-primary)}
+.copy-btn{font-family:'Bebas Neue',sans-serif;font-size:15px;padding:10px 16px;border:1px solid var(--t-primary);background:transparent;color:var(--t-primary);border-radius:8px;cursor:pointer;letter-spacing:2px;white-space:nowrap;min-height:40px;transition:all .2s}
+.copy-btn:hover{background:var(--t-primary);color:var(--t-bg)}
+.copy-btn.copied{border-color:var(--t-green);color:var(--t-green)}
 /* Setup */
 .setup-card{background:var(--t-card-bg);border:1px solid var(--t-card-bdr);border-radius:16px;padding:40px 24px;margin-top:24px;text-align:center}
 .setup-msg{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--t-primary);letter-spacing:4px}
@@ -124,7 +127,7 @@ main{position:relative;z-index:1;padding:env(safe-area-inset-top,8px) 12px env(s
 <button class="snd-badge" id="sndB" onclick="toggleSnd()">🔊 Sound</button>
 
 <!-- QR Overlay -->
-<div class="qr-overlay" id="qrOverlay"><div class="qr-card"><div id="qrBox" style="width:200px;height:200px;margin:0 auto"></div><div class="qr-url" id="qrUrl"></div></div><button class="qr-close" onclick="closeQR()">CLOSE</button></div>
+<div class="qr-overlay" id="qrOverlay"><div class="qr-card"><div id="qrBox" style="width:200px;height:200px;margin:0 auto"></div><div style="display:flex;align-items:center;gap:6px;margin-top:12px"><div class="qr-url" id="qrUrl" style="flex:1;margin:0"></div><button class="copy-btn" id="hostCopyBtn" onclick="copyHostLink()">COPY</button></div></div><button class="qr-close" onclick="closeQR()">CLOSE</button></div>
 
 <!-- Side Panel (Settings) -->
 <div class="sp-overlay" id="spOverlay" onclick="closeSP()"></div>
@@ -212,12 +215,38 @@ let roundState='idle',activeTheme='thrill';
 let prevPlayerIds=new Set();
 let logOpen=false,logEntries=[],htcSelColor=0;
 let penaltyDuration=10;
+let penaltyEndTimes=new Map(); // targetId → endTimestamp
+let penaltyTickInterval=null;
 
 const TEAM_COLORS=[{name:'Crimson',hex:'#FF3E6C'},{name:'Cyan',hex:'#00E5FF'},{name:'Lime',hex:'#76FF03'},{name:'Amber',hex:'#FFD600'}];
+
+// Penalty countdown ticker — updates host UI every 500ms
+function startPenaltyTicker(){
+  if(penaltyTickInterval)return;
+  penaltyTickInterval=setInterval(()=>{
+    const now=Date.now();let anyActive=false;
+    penaltyEndTimes.forEach((endTime,tid)=>{
+      const rem=Math.max(0,Math.ceil((endTime-now)/1000));
+      const el=document.getElementById('pen-cd-'+tid);
+      if(el){
+        if(rem>0){el.textContent='⚠ '+rem+'s';el.style.display='inline-block';anyActive=true;}
+        else{el.textContent='';el.style.display='none';penaltyEndTimes.delete(tid);}
+      } else if(rem<=0) penaltyEndTimes.delete(tid);
+    });
+    if(!anyActive&&penaltyEndTimes.size===0){clearInterval(penaltyTickInterval);penaltyTickInterval=null;}
+  },500);
+}
 
 function toggleSnd(){sndOn=!sndOn;document.getElementById('sndB').textContent=sndOn?'🔊 Sound':'🔇 Off';}
 function openQR(){document.getElementById('qrOverlay').classList.add('on');}
 function closeQR(){document.getElementById('qrOverlay').classList.remove('on');}
+function copyHostLink(){
+  const url=document.getElementById('qrUrl').textContent;
+  navigator.clipboard.writeText(url).then(()=>{
+    const btn=document.getElementById('hostCopyBtn');btn.textContent='COPIED!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='COPY';btn.classList.remove('copied');},2000);
+  }).catch(()=>{showToast('Copy failed','error');});
+}
 function openSP(){document.getElementById('sidePanel').classList.add('on');document.getElementById('spOverlay').classList.add('on');}
 function closeSP(){document.getElementById('sidePanel').classList.remove('on');document.getElementById('spOverlay').classList.remove('on');}
 
@@ -346,7 +375,7 @@ function renderLobby(){
   const teamPlayerMap={};players.forEach(p=>{if(p.team)(teamPlayerMap[p.team]=teamPlayerMap[p.team]||[]).push(p);});
   if(teams.length>0){
     grid.innerHTML=teams.map(t=>{const tp=teamPlayerMap[t.id]||[];
-      return '<div class="team-col" style="border-color:'+t.color+'25"><div class="team-hdr" style="background:'+t.color+'0C"><div class="team-title"><div class="team-dot" style="background:'+t.color+'"></div><span class="team-name" style="color:'+t.color+'">'+esc(t.name).toUpperCase()+'</span><span class="team-count">'+tp.length+'</span></div><button class="team-pen" onclick="event.stopPropagation();penTeam(\''+t.id+'\')">⚠ PENALIZE</button></div><div class="team-players">'+tp.map(p=>playerRowInTeam(p)).join('')+'</div></div>';
+      return '<div class="team-col" style="border-color:'+t.color+'25"><div class="team-hdr" style="background:'+t.color+'0C"><div class="team-title"><div class="team-dot" style="background:'+t.color+'"></div><span class="team-name" style="color:'+t.color+'">'+esc(t.name).toUpperCase()+'</span><span class="team-count">'+tp.length+'</span><span id="pen-cd-'+t.id+'" style="display:none;font-family:Bebas Neue,sans-serif;font-size:16px;color:var(--t-orange);letter-spacing:2px;margin-left:auto"></span></div><button class="team-pen" onclick="event.stopPropagation();penTeam(\''+t.id+'\')">⚠ PENALIZE</button></div><div class="team-players">'+tp.map(p=>playerRowInTeam(p)).join('')+'</div></div>';
     }).join('');
   } else grid.innerHTML='';
   // Host create team visibility
@@ -365,11 +394,27 @@ function playerRowInTeam(p){
 function playerRowUnassigned(p){
   const opts=lobbyData.teams.map(t=>'<option value="'+t.id+'">'+esc(t.name)+'</option>').join('');
   const hasTeams=lobbyData.teams.length>0;
-  return '<div class="tp" style="opacity:'+(p.idle?.4:1)+'"><div class="tp-dot" style="background:'+p.color+'"></div><span class="tp-name">'+esc(p.name)+'</span>'+(p.idle?'<span class="tp-idle">IDLE</span>':'')+(hasTeams?'<select class="tp-assign" onchange="assignPlayer(\''+p.id+'\',this.value)"><option value="">Assign…</option>'+opts+'</select>':'')+'<button class="tp-kick" onclick="event.stopPropagation();penPlayer(\''+p.id+'\')" style="color:var(--t-orange)">⚠</button><button class="tp-kick" onclick="event.stopPropagation();kickP(\''+p.id+'\')">KICK</button></div>';
+  return '<div class="tp" style="opacity:'+(p.idle?.4:1)+'"><div class="tp-dot" style="background:'+p.color+'"></div><span class="tp-name">'+esc(p.name)+'</span><span id="pen-cd-'+p.id+'" style="display:none;font-family:Bebas Neue,sans-serif;font-size:14px;color:var(--t-orange);letter-spacing:1px"></span>'+(p.idle?'<span class="tp-idle">IDLE</span>':'')+(hasTeams?'<select class="tp-assign" onchange="assignPlayer(\''+p.id+'\',this.value)"><option value="">Assign…</option>'+opts+'</select>':'')+'<button class="tp-kick" onclick="event.stopPropagation();penPlayer(\''+p.id+'\')" style="color:var(--t-orange)">⚠</button><button class="tp-kick" onclick="event.stopPropagation();kickP(\''+p.id+'\')">KICK</button></div>';
 }
 function toggleLock(){if(lobbyData.teamsLocked)host.unlockTeams();else host.lockTeams();addLog(lobbyData.teamsLocked?'Teams unlocked':'Teams locked','var(--t-primary)');}
-function penTeam(tid){host.penalizeTeam(tid);const t=lobbyData.teams.find(t=>t.id===tid);showToast((t?t.name:'Team')+' penalized','warning');addLog('⚠ '+(t?t.name:'Team')+' penalized','var(--t-orange)');}
-function penPlayer(pid){host.penalizePlayer(pid);const p=lobbyData.players.find(p=>p.id===pid);showToast((p?p.name:'Player')+' penalized','warning');addLog('⚠ '+(p?p.name:'Player')+' penalized','var(--t-orange)');}
+function penTeam(tid){
+  host.penalizeTeam(tid);
+  const secs=penaltyDuration;
+  penaltyEndTimes.set(tid,Date.now()+secs*1000);
+  startPenaltyTicker();
+  const t=lobbyData.teams.find(t=>t.id===tid);
+  showToast((t?t.name:'Team')+' penalized '+secs+'s','warning');
+  addLog('⚠ '+(t?t.name:'Team')+' penalized '+secs+'s','var(--t-orange)');
+}
+function penPlayer(pid){
+  host.penalizePlayer(pid);
+  const secs=penaltyDuration;
+  penaltyEndTimes.set(pid,Date.now()+secs*1000);
+  startPenaltyTicker();
+  const p=lobbyData.players.find(p=>p.id===pid);
+  showToast((p?p.name:'Player')+' penalized '+secs+'s','warning');
+  addLog('⚠ '+(p?p.name:'Player')+' penalized '+secs+'s','var(--t-orange)');
+}
 function moveP(pid,tid){if(tid==='_none')tid=null;host.movePlayer(pid,tid);const p=host.players.get(pid);const t=tid?host.teams.get(tid):null;addLog((p?p.name:'Player')+' → '+(t?t.name:'Unassigned'),t?t.color:'var(--t-dim)');}
 function kickP(pid){const p=lobbyData.players.find(p=>p.id===pid);host.kickPlayer(pid);if(p)addLog('✕ '+p.name+' kicked','var(--t-secondary)');showToast('Player kicked','error');}
 function onTimerChange(v){host.setTimer(v);}

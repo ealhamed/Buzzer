@@ -122,6 +122,9 @@ main{position:relative;z-index:1;width:100%;max-width:480px;padding:env(safe-are
 .qr-url{font-size:12px;color:var(--t-dim);word-break:break-all;padding:8px;background:var(--t-bg);border-radius:8px;margin-top:10px;font-family:monospace;font-weight:600;max-width:300px}
 .qr-close{margin-top:16px;font-family:'Bebas Neue',sans-serif;font-size:18px;padding:12px 36px;border:1px solid var(--t-bdr);background:transparent;color:var(--t-dim);border-radius:12px;cursor:pointer;letter-spacing:3px;min-height:48px}
 .qr-close:hover{border-color:var(--t-primary);color:var(--t-primary)}
+.copy-btn{font-family:'Bebas Neue',sans-serif;font-size:15px;padding:8px 14px;border:1px solid var(--t-primary);background:transparent;color:var(--t-primary);border-radius:8px;cursor:pointer;letter-spacing:2px;white-space:nowrap;min-height:38px;transition:all .2s}
+.copy-btn:hover{background:var(--t-primary);color:var(--t-bg)}
+.copy-btn.copied{border-color:var(--t-green);color:var(--t-green)}
 
 /* Player settings panel */
 .ps-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600}.ps-overlay.on{display:block}
@@ -144,7 +147,7 @@ main{position:relative;z-index:1;width:100%;max-width:480px;padding:env(safe-are
 
 <!-- Player QR Share Overlay -->
 <div class="qr-overlay" id="pQrOverlay">
-  <div class="qr-card"><div id="pQrBox" style="width:180px;height:180px;margin:0 auto"></div><div class="qr-url" id="pQrUrl"></div></div>
+  <div class="qr-card"><div id="pQrBox" style="width:180px;height:180px;margin:0 auto"></div><div style="display:flex;align-items:center;gap:6px;margin-top:10px"><div class="qr-url" id="pQrUrl" style="flex:1;margin:0"></div><button class="copy-btn" id="pCopyBtn" onclick="copyPlayerLink()">COPY</button></div></div>
   <button class="qr-close" onclick="closePQR()">CLOSE</button>
 </div>
 
@@ -242,6 +245,13 @@ function openPQR(){
   document.getElementById('pQrOverlay').classList.add('on');
 }
 function closePQR(){document.getElementById('pQrOverlay').classList.remove('on');}
+function copyPlayerLink(){
+  const url=document.getElementById('pQrUrl').textContent;
+  navigator.clipboard.writeText(url).then(()=>{
+    const btn=document.getElementById('pCopyBtn');btn.textContent='COPIED!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='COPY';btn.classList.remove('copied');},2000);
+  }).catch(()=>{showToast('Copy failed','error');});
+}
 
 // Player settings panel
 function openPS(){document.getElementById('psPanel').classList.add('on');document.getElementById('psOverlay').classList.add('on');}
@@ -316,11 +326,11 @@ function leaveMyTeam(){if(teamsLocked)return;player.leaveTeam();myTeam=null;rend
 function createTeam(){if(teamsLocked||teamsData.length>=4)return;const name=document.getElementById('ctName').value.trim();if(!name)return;player.createTeam(name,selColorIdx);document.getElementById('ctName').value='';myTeam='pending';}
 function updateTeamDisplay(){const el=document.getElementById('pTeam');if(myTeam&&myTeam!=='pending'){const t=teamsData.find(t=>t.id===myTeam);if(t){el.textContent=t.name.toUpperCase();el.style.color=t.color;}else el.textContent='';}else el.textContent='';}
 
-function setIdle(){state='idle';if(penaltyTimer){clearInterval(penaltyTimer);penaltyTimer=null;}const b=document.getElementById('buzzBtn');b.className='bbtn wait';b.disabled=true;b.querySelector('.bt').textContent='WAIT';b.style.background='radial-gradient(circle at 35% 35%,#333,#222,#181818)';b.style.boxShadow='none';b.setAttribute('aria-label','Buzz button — waiting');document.getElementById('stTxt').textContent='WAITING FOR HOST…';document.getElementById('stTxt').style.color='var(--t-dim)';document.getElementById('resArea').innerHTML='';}
+function setIdle(){if(penaltyTimer){state='penalty';return;}state='idle';const b=document.getElementById('buzzBtn');b.className='bbtn wait';b.disabled=true;b.querySelector('.bt').textContent='WAIT';b.style.background='radial-gradient(circle at 35% 35%,#333,#222,#181818)';b.style.boxShadow='none';b.setAttribute('aria-label','Buzz button — waiting');document.getElementById('stTxt').textContent='WAITING FOR HOST…';document.getElementById('stTxt').style.color='var(--t-dim)';document.getElementById('resArea').innerHTML='';}
 function setArmed(){if(penaltyTimer)return;state='armed';const b=document.getElementById('buzzBtn');b.className='bbtn armed';b.disabled=false;b.querySelector('.bt').textContent='BUZZ!';b.style.background='radial-gradient(circle at 35% 35%,'+lighten(myColor,30)+','+myColor+','+darken(myColor,40)+')';b.style.boxShadow='0 0 50px '+myColor+'40';b.setAttribute('aria-label','Buzz now! Press or hit spacebar');document.getElementById('stTxt').textContent='GO!';document.getElementById('stTxt').style.color=myColor;document.getElementById('resArea').innerHTML='';pHaptic(30);pSound('arm');showToast('Round started — BUZZ!','info');}
 function setBuzzed(order,gap){state='buzzed';const b=document.getElementById('buzzBtn');b.className='bbtn done';b.disabled=true;b.querySelector('.bt').textContent='#'+order;b.setAttribute('aria-label','Position '+order);if(order===1){document.getElementById('stTxt').textContent='🏆 FIRST!';document.getElementById('stTxt').style.color=myColor;document.getElementById('resArea').innerHTML='<div class="res-ord" style="color:'+myColor+'">🏆 #1</div>';showToast('You were FIRST!','success');}else{document.getElementById('stTxt').textContent='#'+order;document.getElementById('stTxt').style.color='var(--t-dim)';document.getElementById('resArea').innerHTML='<div class="res-ord" style="color:'+myColor+'">#'+order+'</div><div class="res-gap">+'+gap+'ms behind</div>';showToast('#'+order+' — '+gap+'ms behind','warning');}}
 function setLocked(firstName,firstColor,firstTeam){if(state!=='armed')return;state='locked';const b=document.getElementById('buzzBtn');b.className='bbtn done';b.disabled=true;b.querySelector('.bt').textContent='✕';b.style.background='radial-gradient(circle at 35% 35%,#333,#222,#181818)';b.style.boxShadow='none';b.setAttribute('aria-label','Locked — '+firstName+' was first');document.getElementById('stTxt').textContent='LOCKED OUT';document.getElementById('stTxt').style.color='var(--t-secondary)';const teamInfo=firstTeam&&teamsData.find(t=>t.id===firstTeam);const teamStr=teamInfo?' <span style="font-size:.7em;color:'+teamInfo.color+'">'+esc(teamInfo.name)+'</span>':'';document.getElementById('resArea').innerHTML='<div class="res-who" style="color:'+firstColor+'">'+esc(firstName)+' was first'+teamStr+'</div>';}
-function setPenalty(seconds){pSound('penalty');pHaptic(200);const b=document.getElementById('buzzBtn');b.className='bbtn penalty';b.disabled=true;b.querySelector('.bt').textContent='⚠';b.style.background='radial-gradient(circle at 35% 35%,#553300,#332200,#221100)';b.style.boxShadow='0 0 30px rgba(255,145,0,.1)';b.setAttribute('aria-label','Penalty — '+seconds+'s');document.getElementById('stTxt').textContent='PENALTY';document.getElementById('stTxt').style.color='var(--t-orange)';let rem=seconds;document.getElementById('resArea').innerHTML='<div class="res-pen" id="penCd">'+rem+'</div>';if(penaltyTimer)clearInterval(penaltyTimer);penaltyTimer=setInterval(()=>{rem--;const el=document.getElementById('penCd');if(el)el.textContent=rem;if(rem<=0){clearInterval(penaltyTimer);penaltyTimer=null;setArmed();}},1000);state='armed';}
+function setPenalty(seconds){pSound('penalty');pHaptic(200);const b=document.getElementById('buzzBtn');b.className='bbtn penalty';b.disabled=true;b.querySelector('.bt').textContent='⚠';b.style.background='radial-gradient(circle at 35% 35%,#553300,#332200,#221100)';b.style.boxShadow='0 0 30px rgba(255,145,0,.1)';b.setAttribute('aria-label','Penalty — '+seconds+'s');document.getElementById('stTxt').textContent='PENALTY';document.getElementById('stTxt').style.color='var(--t-orange)';let rem=seconds;document.getElementById('resArea').innerHTML='<div class="res-pen" id="penCd">'+rem+'</div>';if(penaltyTimer)clearInterval(penaltyTimer);penaltyTimer=setInterval(()=>{rem--;const el=document.getElementById('penCd');if(el)el.textContent=rem;if(rem<=0){clearInterval(penaltyTimer);penaltyTimer=null;setArmed();}},1000);state='penalty';}
 function doBuzz(){if(!player)return;if(lobbyOpen)toggleLobby();player.buzz();}
 function showOverlay(msg,sub){const o=document.createElement('div');o.className='overlay';o.setAttribute('role','alert');o.innerHTML='<div class="overlay-logo">BUZZER</div><div class="overlay-t">'+msg+'</div>'+(sub?'<div class="overlay-sub">'+sub+'</div>':'');document.body.appendChild(o);}
 
