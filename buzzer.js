@@ -1,73 +1,40 @@
-/*  BUZZER v3 — P2P Game Engine
-    PeerJS WebRTC. Static hosting. Team-only penalties.
-*/
-const PEER_PREFIX = 'bzr3-';
-const MAX_PLAYERS = 16;
-const MAX_TEAMS = 4;
-const HEARTBEAT_MS = 3000;
-const IDLE_THRESHOLD_MS = 10000;
+/* BUZZER FINAL — P2P Game Engine
+   PeerJS WebRTC. Static hosting. Latency correction. Round history. */
+const PEER_PREFIX='bzf-';const MAX_PLAYERS=16;const MAX_TEAMS=4;
+const HEARTBEAT_MS=3000;const IDLE_THRESHOLD_MS=10000;
+const TEAM_PRESET_COLORS=[{name:'Crimson',hex:'#FF3E6C'},{name:'Cyan',hex:'#00E5FF'},{name:'Lime',hex:'#76FF03'},{name:'Amber',hex:'#FFD600'}];
+const PLAYER_COLORS=['#FF6B8A','#00D4F5','#FFE040','#8CFF20','#FF7B00','#E040FB','#00F5A0','#FF2D55','#40FFFF','#FFEE58','#80FFCC','#FF8A50','#B39DFF','#69F0AE','#FF8A80','#84FFFF'];
 
-const TEAM_PRESET_COLORS = [
-  { name:'Crimson', hex:'#FF3E6C' },
-  { name:'Cyan',    hex:'#00E5FF' },
-  { name:'Lime',    hex:'#76FF03' },
-  { name:'Amber',   hex:'#FFD600' }
-];
-
-const PLAYER_COLORS = [
-  '#FF6B8A','#00D4F5','#FFE040','#8CFF20',
-  '#FF7B00','#E040FB','#00F5A0','#FF2D55',
-  '#40FFFF','#FFEE58','#80FFCC','#FF8A50',
-  '#B39DFF','#69F0AE','#FF8A80','#84FFFF'
-];
-
-let _actx;
-function actx(){ if(!_actx) _actx = new (window.AudioContext||window.webkitAudioContext)(); return _actx; }
-
+// Audio
+let _actx;function actx(){if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();return _actx;}
 function playSound(key){
-  const defs = {
-    buzz:  { type:'square', f0:880, f1:440, dur:.15, vol:.25 },
-    lock:  { type:'sawtooth', f0:200, f1:100, dur:.2, vol:.12 },
-    click: { type:'sine', f0:660, f1:660, dur:.1, vol:.15 },
-    arm:   { type:'sine', f0:520, f1:780, dur:.2, vol:.18 },
-    penalty:{ type:'sawtooth', f0:150, f1:80, dur:.35, vol:.2 }
-  };
-  try {
-    const s=defs[key]; if(!s) return;
-    const c=actx(), o=c.createOscillator(), g=c.createGain();
-    o.connect(g); g.connect(c.destination);
-    o.type=s.type;
-    o.frequency.setValueAtTime(s.f0,c.currentTime);
-    o.frequency.exponentialRampToValueAtTime(Math.max(1,s.f1),c.currentTime+s.dur);
-    g.gain.setValueAtTime(s.vol,c.currentTime);
-    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+s.dur+.05);
-    o.start(c.currentTime); o.stop(c.currentTime+s.dur+.06);
-  } catch(e){}
+  const d={buzz:{type:'square',f0:880,f1:440,dur:.15,vol:.25},lock:{type:'sawtooth',f0:200,f1:100,dur:.2,vol:.12},click:{type:'sine',f0:660,f1:660,dur:.1,vol:.15},arm:{type:'sine',f0:520,f1:780,dur:.2,vol:.18},penalty:{type:'sawtooth',f0:150,f1:80,dur:.35,vol:.2}};
+  try{const s=d[key];if(!s)return;const c=actx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=s.type;o.frequency.setValueAtTime(s.f0,c.currentTime);o.frequency.exponentialRampToValueAtTime(Math.max(1,s.f1),c.currentTime+s.dur);g.gain.setValueAtTime(s.vol,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+s.dur+.05);o.start(c.currentTime);o.stop(c.currentTime+s.dur+.06);}catch(e){}
 }
+function hapticBuzz(ms){try{if(navigator.vibrate)navigator.vibrate(ms||80);}catch(e){}}
+function genCode(){return Math.random().toString(36).substring(2,6).toUpperCase();}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function lighten(h,p){const n=parseInt(h.replace('#',''),16),a=Math.round(2.55*p);return'#'+(0x1000000+Math.min(255,(n>>16)+a)*0x10000+Math.min(255,((n>>8)&0xFF)+a)*0x100+Math.min(255,(n&0xFF)+a)).toString(16).slice(1)}
+function darken(h,p){const n=parseInt(h.replace('#',''),16),a=Math.round(2.55*p);return'#'+(0x1000000+Math.max(0,(n>>16)-a)*0x10000+Math.max(0,((n>>8)&0xFF)-a)*0x100+Math.max(0,(n&0xFF)-a)).toString(16).slice(1)}
 
-function hapticBuzz(ms){ try { if(navigator.vibrate) navigator.vibrate(ms||80); } catch(e){} }
-function genCode(){ return Math.random().toString(36).substring(2,6).toUpperCase(); }
-function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
-function lighten(hex,pct){const n=parseInt(hex.replace('#',''),16),a=Math.round(2.55*pct);return'#'+(0x1000000+Math.min(255,(n>>16)+a)*0x10000+Math.min(255,((n>>8)&0xFF)+a)*0x100+Math.min(255,(n&0xFF)+a)).toString(16).slice(1)}
-function darken(hex,pct){const n=parseInt(hex.replace('#',''),16),a=Math.round(2.55*pct);return'#'+(0x1000000+Math.max(0,(n>>16)-a)*0x10000+Math.max(0,((n>>8)&0xFF)-a)*0x100+Math.max(0,(n&0xFF)-a)).toString(16).slice(1)}
-
-class BuzzerHost {
+/* ═══ HOST ═══ */
+class BuzzerHost{
   constructor(onUpdate){
-    this.onUpdate=onUpdate; this.peer=null; this.conns=new Map(); this.players=new Map();
-    this.teams=new Map(); this.buzzes=[]; this.armed=false; this.locked=false;
-    this.timerDuration=3; this.colorIdx=0; this.roomCode=''; this.pidCounter=0;
-    this.teamsLocked=false; this._hbInterval=null; this.reconnectTokens=new Map(); this.theme='neon';
+    this.onUpdate=onUpdate;this.peer=null;this.conns=new Map();this.players=new Map();
+    this.teams=new Map();this.buzzes=[];this.armed=false;this.locked=false;
+    this.timerDuration=3;this.colorIdx=0;this.roomCode='';this.pidCounter=0;
+    this.teamsLocked=false;this._hbInterval=null;this.reconnectTokens=new Map();
+    this.theme='neon';this.roundHistory=[];this.earlyBuzzPenalty=false;
+    // Latency: store clock offsets per player
+    this.clockOffsets=new Map();
   }
   create(){
-    return new Promise((resolve,reject)=>{
+    return new Promise((res,rej)=>{
       this.roomCode=genCode();
       this.peer=new Peer(PEER_PREFIX+this.roomCode.toLowerCase(),{debug:0,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}});
-      this.peer.on('open',()=>{this._startHB();resolve(this.roomCode);});
+      this.peer.on('open',()=>{this._startHB();res(this.roomCode);});
       this.peer.on('connection',c=>this._onConn(c));
-      this.peer.on('error',err=>{
-        if(err.type==='unavailable-id'){this.roomCode=genCode();this.peer.destroy();this.create().then(resolve).catch(reject);}
-        else reject(err);
-      });
+      this.peer.on('error',err=>{if(err.type==='unavailable-id'){this.roomCode=genCode();this.peer.destroy();this.create().then(res).catch(rej);}else rej(err);});
     });
   }
   _startHB(){
@@ -75,17 +42,31 @@ class BuzzerHost {
       const now=Date.now();let ch=false;
       for(const[,p]of this.players){const w=p.idle;p.idle=(now-p.lastSeen)>IDLE_THRESHOLD_MS;if(p.idle!==w)ch=true;}
       if(ch)this._broadcastLobby();
-      for(const[,c]of this.conns)try{c.conn.send({type:'ping'});}catch(e){}
+      // Ping with host timestamp for latency calc
+      for(const[,c]of this.conns)try{c.conn.send({type:'ping',t:Date.now()});}catch(e){}
     },HEARTBEAT_MS);
   }
   _onConn(conn){conn.on('open',()=>{conn.on('data',d=>this._onData(conn,d));});conn.on('close',()=>this._onDC(conn));conn.on('error',()=>this._onDC(conn));}
   _onDC(conn){const e=this.conns.get(conn.peer);if(!e)return;const p=this.players.get(e.playerId);if(p){p.idle=true;p.connPeer=null;this._broadcastLobby();}this.conns.delete(conn.peer);}
   _onData(conn,msg){
     switch(msg.type){
-      case'join':this._join(conn,msg);break;case'reconnect':this._reconn(conn,msg);break;
-      case'buzz':this._buzz(conn);break;
-      case'pong':{const e=this.conns.get(conn.peer);if(e){const p=this.players.get(e.playerId);if(p){p.lastSeen=Date.now();p.idle=false;}}break;}
-      case'create_team':this._createTeam(conn,msg);break;case'join_team':this._joinTeam(conn,msg);break;case'leave_team':this._leaveTeam(conn);break;
+      case'join':this._join(conn,msg);break;
+      case'reconnect':this._reconn(conn,msg);break;
+      case'buzz':this._buzz(conn,msg);break;
+      case'pong':{
+        const e=this.conns.get(conn.peer);if(!e)break;
+        const p=this.players.get(e.playerId);if(p){p.lastSeen=Date.now();p.idle=false;}
+        // Latency correction: calc clock offset
+        if(msg.hostT&&msg.playerT){
+          const rtt=Date.now()-msg.hostT;
+          const offset=msg.playerT-(msg.hostT+rtt/2);
+          this.clockOffsets.set(e.playerId,offset);
+        }
+        break;
+      }
+      case'create_team':this._createTeam(conn,msg);break;
+      case'join_team':this._joinTeam(conn,msg);break;
+      case'leave_team':this._leaveTeam(conn);break;
     }
   }
   _join(conn,msg){
@@ -107,18 +88,31 @@ class BuzzerHost {
     this.conns.set(conn.peer,{conn,playerId:pid});
     conn.send({type:'rejoined',id:pid,color:p.color,name:p.name,team:p.team,token:msg.token,teams:this._tp(),teamsLocked:this.teamsLocked,theme:this.theme});
     if(this.armed&&!this.locked)conn.send({type:'round_armed',timerDuration:this.timerDuration});
-    else if(this.armed&&this.locked&&this.buzzes.length>0)conn.send({type:'first_buzz',id:this.buzzes[0].id,name:this.buzzes[0].name,color:this.buzzes[0].color,team:this.buzzes[0].team,timerDuration:this.timerDuration});
+    else if(this.armed&&this.locked&&this.buzzes.length>0){const b=this.buzzes[0];conn.send({type:'first_buzz',id:b.id,name:b.name,color:b.color,team:b.team,timerDuration:this.timerDuration});}
     this._broadcastLobby();
   }
-  _buzz(conn){
-    if(!this.armed)return;const e=this.conns.get(conn.peer);if(!e)return;
+  _buzz(conn,msg){
+    if(!this.armed)return;
+    const e=this.conns.get(conn.peer);if(!e)return;
     const pid=e.playerId,p=this.players.get(pid);if(!p)return;
     if(this.buzzes.find(b=>b.id===pid))return;
     if(p.penaltyUntil&&Date.now()<p.penaltyUntil){conn.send({type:'penalty_active',remaining:Math.ceil((p.penaltyUntil-Date.now())/1000)});return;}
-    const now=Date.now(),isFirst=this.buzzes.length===0,gap=isFirst?0:now-this.buzzes[0].time;
-    this.buzzes.push({id:pid,name:p.name,color:p.color,team:p.team,time:now,gap,order:this.buzzes.length+1});
-    if(isFirst){this.locked=true;this._broadcast({type:'first_buzz',id:pid,name:p.name,color:p.color,team:p.team,timerDuration:this.timerDuration});}
-    conn.send({type:'buzz_confirmed',order:this.buzzes.length,gap});
+
+    // Latency correction: use player's local timestamp if available
+    let buzzTime=Date.now();
+    if(msg.playerTime){
+      const offset=this.clockOffsets.get(pid)||0;
+      buzzTime=msg.playerTime-offset; // Convert player time to host time
+    }
+
+    const isFirst=this.buzzes.length===0;
+    const gap=isFirst?0:buzzTime-this.buzzes[0].time;
+    this.buzzes.push({id:pid,name:p.name,color:p.color,team:p.team,time:buzzTime,gap:Math.max(0,gap),order:this.buzzes.length+1});
+    if(isFirst){
+      this.locked=true;
+      this._broadcast({type:'first_buzz',id:pid,name:p.name,color:p.color,team:p.team,timerDuration:this.timerDuration});
+    }
+    conn.send({type:'buzz_confirmed',order:this.buzzes.length,gap:Math.max(0,gap)});
     this.onUpdate({type:'buzz_list',buzzes:[...this.buzzes]});
   }
   _createTeam(conn,msg){
@@ -139,8 +133,23 @@ class BuzzerHost {
     if(this.teamsLocked){conn.send({type:'error',message:'Teams are locked'});return;}
     const e=this.conns.get(conn.peer);if(!e)return;const p=this.players.get(e.playerId);if(p)p.team=null;this._broadcastLobby();
   }
-  armRound(){this.armed=true;this.locked=false;this.buzzes=[];this._broadcast({type:'round_armed',timerDuration:this.timerDuration});this.onUpdate({type:'armed'});}
-  resetRound(){this.armed=false;this.locked=false;this.buzzes=[];for(const[,p]of this.players)p.penaltyUntil=0;this._broadcast({type:'round_reset'});this.onUpdate({type:'reset'});}
+  armRound(){
+    this.armed=true;this.locked=false;this.buzzes=[];
+    this._broadcast({type:'round_armed',timerDuration:this.timerDuration});
+    this.onUpdate({type:'armed'});
+  }
+  resetRound(){
+    // Save to history if there was a buzz
+    if(this.buzzes.length>0){
+      const b=this.buzzes[0];
+      const teamInfo=b.team?this.teams.get(b.team):null;
+      this.roundHistory.push({round:this.roundHistory.length+1,name:b.name,color:b.color,team:teamInfo?teamInfo.name:null,teamColor:teamInfo?teamInfo.color:null});
+      this.onUpdate({type:'history_update',history:[...this.roundHistory]});
+    }
+    this.armed=false;this.locked=false;this.buzzes=[];
+    for(const[,p]of this.players)p.penaltyUntil=0;
+    this._broadcast({type:'round_reset'});this.onUpdate({type:'reset'});
+  }
   setTimer(s){this.timerDuration=Math.max(1,Math.min(60,parseInt(s)||3));}
   penalizeTeam(teamId){
     const until=Date.now()+10000;
@@ -163,33 +172,52 @@ class BuzzerHost {
   destroy(){if(this._hbInterval)clearInterval(this._hbInterval);if(this.peer)this.peer.destroy();}
 }
 
-class BuzzerPlayer {
+/* ═══ PLAYER ═══ */
+class BuzzerPlayer{
   constructor(onUpdate){this.onUpdate=onUpdate;this.peer=null;this.conn=null;this.myId=null;this.myColor='#00E5FF';this.myName='';this.myTeam=null;this.token=null;this._pi=null;}
   join(roomCode,name){
-    return new Promise((resolve,reject)=>{
+    return new Promise((res,rej)=>{
       this.myName=name;
       this.peer=new Peer(undefined,{debug:0,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}});
       this.peer.on('open',()=>{
         this.conn=this.peer.connect(PEER_PREFIX+roomCode.toLowerCase(),{reliable:true});
-        this.conn.on('open',()=>{const s=sessionStorage.getItem('bzr_token_'+roomCode);if(s)this.conn.send({type:'reconnect',token:s});else this.conn.send({type:'join',name});this._pi=setInterval(()=>{if(this.conn)try{this.conn.send({type:'pong'});}catch(e){}},HEARTBEAT_MS);});
-        this.conn.on('data',d=>this._onData(d,resolve));
+        this.conn.on('open',()=>{
+          const s=sessionStorage.getItem('bzr_token_'+roomCode);
+          if(s)this.conn.send({type:'reconnect',token:s});
+          else this.conn.send({type:'join',name});
+          this._pi=setInterval(()=>{if(this.conn)try{this.conn.send({type:'pong'});}catch(e){}},HEARTBEAT_MS);
+        });
+        this.conn.on('data',d=>this._onData(d,res));
         this.conn.on('close',()=>this.onUpdate({type:'disconnected'}));
-        this.conn.on('error',()=>reject(new Error('Connection failed')));
+        this.conn.on('error',()=>rej(new Error('Connection failed')));
       });
-      this.peer.on('error',err=>{if(err.type==='peer-unavailable')reject(new Error('Room not found'));else reject(err);});
-      setTimeout(()=>{if(!this.myId)reject(new Error('Connection timed out'));},12000);
+      this.peer.on('error',err=>{if(err.type==='peer-unavailable')rej(new Error('Room not found'));else rej(err);});
+      setTimeout(()=>{if(!this.myId)rej(new Error('Connection timed out'));},12000);
     });
   }
   _onData(msg,res){
     switch(msg.type){
-      case'joined':this.myId=msg.id;this.myColor=msg.color;this.myName=msg.name;this.token=msg.token;{const c=new URLSearchParams(location.search).get('room')||'';if(this.token)sessionStorage.setItem('bzr_token_'+c.toUpperCase(),this.token);}if(res)res({id:msg.id,color:msg.color,name:msg.name,teams:msg.teams,teamsLocked:msg.teamsLocked});this.onUpdate(msg);break;
-      case'rejoined':this.myId=msg.id;this.myColor=msg.color;this.myName=msg.name;this.myTeam=msg.team;this.token=msg.token;if(res)res({id:msg.id,color:msg.color,name:msg.name,teams:msg.teams,teamsLocked:msg.teamsLocked,rejoined:true});this.onUpdate(msg);break;
-      case'ping':if(this.conn)try{this.conn.send({type:'pong'});}catch(e){}break;
-      case'error':if(msg.message&&msg.message.includes('Reconnect failed')){const c=new URLSearchParams(location.search).get('room')||'';sessionStorage.removeItem('bzr_token_'+c.toUpperCase());}this.onUpdate(msg);break;
+      case'joined':
+        this.myId=msg.id;this.myColor=msg.color;this.myName=msg.name;this.token=msg.token;
+        {const c=new URLSearchParams(location.search).get('room')||'';if(this.token)sessionStorage.setItem('bzr_token_'+c.toUpperCase(),this.token);}
+        if(res)res({id:msg.id,color:msg.color,name:msg.name,teams:msg.teams,teamsLocked:msg.teamsLocked,theme:msg.theme});
+        this.onUpdate(msg);break;
+      case'rejoined':
+        this.myId=msg.id;this.myColor=msg.color;this.myName=msg.name;this.myTeam=msg.team;this.token=msg.token;
+        if(res)res({id:msg.id,color:msg.color,name:msg.name,teams:msg.teams,teamsLocked:msg.teamsLocked,theme:msg.theme,rejoined:true});
+        this.onUpdate(msg);break;
+      case'ping':
+        // Respond with both host timestamp and player timestamp for latency calculation
+        if(this.conn)try{this.conn.send({type:'pong',hostT:msg.t,playerT:Date.now()});}catch(e){}
+        break;
+      case'error':
+        if(msg.message&&msg.message.includes('Reconnect failed')){const c=new URLSearchParams(location.search).get('room')||'';sessionStorage.removeItem('bzr_token_'+c.toUpperCase());}
+        this.onUpdate(msg);break;
       default:this.onUpdate(msg);
     }
   }
-  buzz(){if(this.conn)this.conn.send({type:'buzz'});}
+  // Buzz with local timestamp for latency correction
+  buzz(){if(this.conn)this.conn.send({type:'buzz',playerTime:Date.now()});}
   createTeam(name,colorIndex){if(this.conn)this.conn.send({type:'create_team',name,colorIndex});}
   joinTeam(teamId){if(this.conn)this.conn.send({type:'join_team',teamId});this.myTeam=teamId;}
   leaveTeam(){if(this.conn)this.conn.send({type:'leave_team'});this.myTeam=null;}

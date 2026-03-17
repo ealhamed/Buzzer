@@ -6,432 +6,302 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#06060C">
 <title>BUZZER — Host</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="buzzer.js"></script>
 <script src="themes.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--t-bg:#06060C;--t-s1:#0E0E18;--t-s2:#161624;--t-bdr:#222236;--t-txt:#E0E0F0;--t-dim:#8888A0;--t-primary:#00E5FF;--t-secondary:#FF3E6C;--t-green:#76FF03;--t-yellow:#FFD600;--t-orange:#FF9100;--t-btn-start-bg:linear-gradient(135deg,#00E5FF,#00B4D8);--t-btn-start-c:#06060C;--t-btn-reset-bg:linear-gradient(135deg,#FF3E6C,#D81B60);--t-btn-reset-c:#ffffff;--t-card-bg:#0E0E18;--t-card-bdr:#222236;--t-input-bg:#06060C;--t-buzz-glow:1;--t-logo-grad:linear-gradient(135deg,#00E5FF,#FF3E6C);--t-lock-color:#76FF03;--t-lock-bg:rgba(118,255,3,0.05);--t-lock-bdr:rgba(118,255,3,0.3);--t-penalty-color:#FF9100;--t-penalty-bg:rgba(255,145,0,0.06);--t-penalty-bdr:rgba(255,145,0,0.25);--t-mode:dark}
+:root{--t-bg:#06060C;--t-s1:#0E0E18;--t-s2:#161624;--t-bdr:#222236;--t-txt:#E0E0F0;--t-dim:#8888A0;--t-primary:#00E5FF;--t-secondary:#FF3E6C;--t-green:#76FF03;--t-yellow:#FFD600;--t-orange:#FF9100;--t-btn-start-bg:linear-gradient(135deg,#00E5FF,#00B4D8);--t-btn-start-c:#06060C;--t-btn-reset-bg:linear-gradient(135deg,#FF3E6C,#D81B60);--t-btn-reset-c:#fff;--t-card-bg:#0E0E18;--t-card-bdr:#222236;--t-input-bg:#06060C;--t-buzz-glow:1;--t-logo-grad:linear-gradient(135deg,#00E5FF,#FF3E6C);--t-lock-color:#76FF03;--t-lock-bg:rgba(118,255,3,.05);--t-lock-bdr:rgba(118,255,3,.3);--t-penalty-color:#FF9100;--t-penalty-bg:rgba(255,145,0,.06);--t-penalty-bdr:rgba(255,145,0,.25);--t-mode:dark}
 html,body{height:100%}
-body{font-family:'Rajdhani',sans-serif;background:var(--t-bg);color:var(--t-txt);overflow-x:hidden;-webkit-overflow-scrolling:touch}
+body{font-family:'DM Sans',sans-serif;font-weight:700;background:var(--t-bg);color:var(--t-txt);overflow-x:hidden;-webkit-overflow-scrolling:touch}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(0,229,255,.05) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(255,62,108,.03) 0%,transparent 50%);pointer-events:none}
-main{position:relative;z-index:1;padding:10px;max-width:520px;margin:0 auto;padding-bottom:90px}
+main{position:relative;z-index:1;padding:10px;max-width:540px;margin:0 auto;padding-bottom:80px}
 .scr{display:none}.scr.on{display:block}
 
-/* Header bar */
-.hbar{display:flex;align-items:center;padding:8px 12px;background:var(--t-s1);border-radius:12px;gap:6px}
-.back-btn{width:34px;height:34px;background:var(--t-s2);border:1px solid var(--t-bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;color:var(--t-dim);text-decoration:none;transition:all .2s;flex-shrink:0}
-.back-btn:hover,.back-btn:focus-visible{border-color:var(--t-primary);color:var(--t-primary);outline:none}
-.hbar-logo{font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:3px;padding-right:3px;background:linear-gradient(135deg,var(--t-primary),var(--t-secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hbar-code{margin-left:auto;font-family:'Orbitron',monospace;font-size:clamp(16px,5vw,22px);font-weight:900;color:var(--t-primary);letter-spacing:6px}
-.icon-btn{width:34px;height:34px;background:var(--t-s2);border:1px solid var(--t-bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .2s;color:var(--t-dim);flex-shrink:0}
-.icon-btn:hover,.icon-btn:focus-visible{border-color:var(--t-primary);color:var(--t-primary);outline:none}
+/* Header */
+.hbar{display:flex;align-items:center;padding:10px 14px;background:var(--t-card-bg);border-radius:14px;gap:8px}
+.back{width:38px;height:38px;background:var(--t-s2);border:2px solid var(--t-bdr);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;cursor:pointer;color:var(--t-dim);text-decoration:none;transition:all .2s;flex-shrink:0}
+.back:hover,.back:focus-visible{border-color:var(--t-primary);color:var(--t-primary);outline:none}
+.hlogo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;background:var(--t-logo-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hcode{margin-left:auto;font-family:'Bebas Neue',sans-serif;font-size:clamp(22px,6vw,30px);color:var(--t-primary);letter-spacing:6px}
+.ibtn{width:38px;height:38px;background:var(--t-s2);border:2px solid var(--t-bdr);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;color:var(--t-dim);transition:all .2s;flex-shrink:0}
+.ibtn:hover,.ibtn:focus-visible{border-color:var(--t-primary);color:var(--t-primary);outline:none}
 
-/* QR Popup */
-.qr-overlay{display:none;position:fixed;inset:0;background:rgba(6,6,12,.93);z-index:500;align-items:center;justify-content:center;flex-direction:column}
-.qr-overlay.on{display:flex}
-.qr-card{background:var(--t-s1);border:1px solid var(--t-bdr);border-radius:16px;padding:24px;text-align:center}
-.qr-card canvas{border-radius:8px}
-.qr-url{font-size:12px;color:var(--t-dim);word-break:break-all;padding:8px;background:var(--t-bg);border-radius:6px;margin-top:10px;font-family:monospace;max-width:300px}
-.qr-close{margin-top:16px;font-family:'Orbitron',monospace;font-size:13px;padding:10px 28px;border:1px solid var(--t-bdr);background:transparent;color:var(--t-dim);border-radius:10px;cursor:pointer;letter-spacing:2px;transition:all .2s}
-.qr-close:hover,.qr-close:focus-visible{border-color:var(--t-primary);color:var(--t-primary);outline:none}
+/* QR overlay */
+.qro{display:none;position:fixed;inset:0;background:rgba(6,6,12,.94);z-index:500;align-items:center;justify-content:center;flex-direction:column}
+.qro.on{display:flex}
+.qr-card{background:var(--t-card-bg);border:2px solid var(--t-bdr);border-radius:20px;padding:28px;text-align:center}
+.qr-card canvas{border-radius:10px}
+.qr-url{font-size:13px;font-weight:600;color:var(--t-dim);word-break:break-all;padding:10px;background:var(--t-bg);border-radius:8px;margin-top:12px;font-family:monospace;max-width:300px}
+.qr-close{margin-top:20px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:800;padding:14px 32px;border:2px solid var(--t-bdr);background:transparent;color:var(--t-dim);border-radius:12px;cursor:pointer;letter-spacing:2px;text-transform:uppercase}
+.qr-close:hover{border-color:var(--t-primary);color:var(--t-primary)}
 
 /* Setup */
-.setup-card{background:var(--t-s1);border:1px solid var(--t-bdr);border-radius:14px;padding:32px 20px;margin-top:20px;text-align:center}
-.setup-msg{font-family:'Orbitron',monospace;font-size:14px;color:var(--t-primary);letter-spacing:3px}
-.setup-err{color:var(--t-secondary);font-size:14px;margin-top:10px}
+.setup{background:var(--t-card-bg);border:2px solid var(--t-bdr);border-radius:18px;padding:36px 24px;margin-top:24px;text-align:center}
+.setup-msg{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--t-primary);letter-spacing:4px}
+.setup-err{color:var(--t-secondary);font-size:15px;font-weight:600;margin-top:12px}
 
-/* The Box — unified interactive card */
-.the-box{background:var(--t-card-bg);border:3px solid var(--t-primary);border-radius:16px;padding:24px 16px;text-align:center;margin-top:8px;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:border-color .3s,transform .1s;position:relative;-webkit-tap-highlight-color:transparent;user-select:none}
+/* THE BOX */
+.the-box{background:var(--t-card-bg);border:3px solid var(--t-primary);border-radius:20px;padding:28px 16px 20px;text-align:center;margin-top:10px;min-height:clamp(200px,40vh,280px);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:border-color .3s,transform .1s;-webkit-tap-highlight-color:transparent;user-select:none}
 .the-box:active{transform:scale(.97)}
-.the-box:focus-visible{outline:2px solid #fff;outline-offset:2px}
-.the-box.disabled{opacity:.3;cursor:not-allowed;border-color:var(--t-card-bdr)}
-.the-box.disabled:active{transform:none}
-.the-box.waiting{animation:boxPulse 2s ease-in-out infinite}
+.the-box:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.the-box.disabled{opacity:.25;cursor:not-allowed;border-color:var(--t-bdr)}.the-box.disabled:active{transform:none}
+.the-box.waiting{animation:bp 2s ease-in-out infinite}
 .the-box.buzzed{animation:none}
 .the-box.expired{animation:none;border-color:var(--t-dim)}
-@keyframes boxPulse{0%,100%{border-color:var(--t-primary)}50%{border-color:var(--t-card-bdr)}}
-.box-label{font-family:'Orbitron',monospace;font-size:clamp(16px,4.5vw,22px);font-weight:700;letter-spacing:4px;color:var(--t-primary);text-transform:uppercase;min-height:28px;display:flex;align-items:center;justify-content:center;transition:color .2s}
-.box-team{font-size:14px;font-weight:600;min-height:20px;transition:color .2s}
-.box-name{font-family:'Orbitron',monospace;font-size:clamp(28px,8vw,38px);font-weight:900;letter-spacing:2px;min-height:46px;display:flex;align-items:center;justify-content:center;transition:color .2s}
-.box-timer{font-family:'Orbitron',monospace;font-size:clamp(48px,13vw,64px);font-weight:900;line-height:1;min-height:66px;display:flex;align-items:center;justify-content:center;transition:color .2s,opacity .2s}
-.box-sub{font-size:12px;letter-spacing:2px;color:var(--t-dim);text-transform:uppercase;min-height:18px}
+@keyframes bp{0%,100%{border-color:var(--t-primary)}50%{border-color:var(--t-bdr)}}
+.bx-label{font-family:'Bebas Neue',sans-serif;font-size:clamp(22px,6vw,32px);letter-spacing:clamp(4px,1.5vw,8px);color:var(--t-primary);min-height:36px;display:flex;align-items:center;justify-content:center;transition:color .2s}
+.bx-team{font-size:clamp(14px,3.5vw,18px);font-weight:700;min-height:22px}
+.bx-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,10vw,52px);letter-spacing:3px;min-height:54px;display:flex;align-items:center;justify-content:center}
+.bx-timer{font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,15vw,80px);line-height:1;min-height:72px;display:flex;align-items:center;justify-content:center;transition:opacity .2s}
+.bx-sub{font-size:clamp(12px,3vw,15px);font-weight:700;letter-spacing:2px;color:var(--t-dim);text-transform:uppercase;min-height:20px}
+.bx-more{width:100%;padding:10px;margin-top:8px;background:var(--t-s2);border:2px solid var(--t-bdr);border-radius:10px;color:var(--t-dim);font-size:14px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .2s}
+.bx-more:hover{border-color:var(--t-primary);color:var(--t-primary)}
+.bx-list{display:none;margin-top:6px;flex-direction:column;gap:4px}.bx-list.open{display:flex}
+.bx-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--t-s2);border-radius:8px;font-size:14px;font-weight:700}
+.bx-ord{font-family:'Bebas Neue',sans-serif;font-size:18px;width:28px;text-align:center}
+.bx-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.bx-gap{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--t-dim);margin-left:auto}
 
 /* Timer setting */
-.timer-setting{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--t-card-bg);border:1px solid var(--t-card-bdr);border-radius:10px;margin-top:8px}
-.timer-setting label{font-size:12px;color:var(--t-dim);letter-spacing:2px;text-transform:uppercase;font-weight:600}
-.timer-input{width:50px;padding:6px 4px;font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:var(--t-primary);background:var(--t-input-bg);border:1px solid var(--t-bdr);border-radius:8px;text-align:center;outline:none;-moz-appearance:textfield;margin-left:auto}
-.timer-input::-webkit-inner-spin-button,.timer-input::-webkit-outer-spin-button{-webkit-appearance:none}
-.timer-input:focus{border-color:var(--t-primary)}
-.timer-unit{font-size:13px;color:var(--t-dim);font-weight:600}
-
-/* See-all buzzes */
-.bz-more{width:100%;padding:8px;margin-top:10px;background:var(--t-s2);border:1px solid var(--t-bdr);border-radius:8px;color:var(--t-dim);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .2s}
-.bz-more:hover{border-color:var(--t-primary);color:var(--t-primary)}
-.bz-list{display:none;margin-top:8px;flex-direction:column;gap:4px}.bz-list.open{display:flex}
-.bz-item{display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--t-s2);border-radius:6px;font-size:12px}
-.bz-ord{font-family:'Orbitron',monospace;font-weight:700;font-size:11px;width:22px;text-align:center}
-.bz-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.bz-gap{font-family:'Orbitron',monospace;font-size:11px;color:var(--t-dim);margin-left:auto}
+.tmr{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--t-card-bg);border:2px solid var(--t-bdr);border-radius:12px;margin-top:8px}
+.tmr label{font-size:14px;font-weight:700;color:var(--t-dim);letter-spacing:2px;text-transform:uppercase}
+.tmr-in{width:54px;padding:8px 4px;font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--t-primary);background:var(--t-input-bg);border:2px solid var(--t-bdr);border-radius:10px;text-align:center;outline:none;-moz-appearance:textfield;margin-left:auto}
+.tmr-in::-webkit-inner-spin-button,.tmr-in::-webkit-outer-spin-button{-webkit-appearance:none}
+.tmr-in:focus{border-color:var(--t-primary)}
+.tmr-u{font-size:14px;font-weight:700;color:var(--t-dim)}
 
 /* Lock toggle */
-.lock-toggle{padding:12px 16px;border-radius:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:8px;transition:all .25s;border:2px solid}
-.lock-toggle.unlocked{background:rgba(118,255,3,.05);border-color:rgba(118,255,3,.3)}
-.lock-toggle.locked{background:rgba(255,62,108,.05);border-color:rgba(255,62,108,.3)}
-.lock-icon{font-size:18px}
-.lock-label{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;letter-spacing:2px}
-.lock-hint{font-size:12px;color:var(--t-dim)}
+.lock{padding:14px 16px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:8px;transition:all .25s;border:2px solid;-webkit-tap-highlight-color:transparent}
+.lock.un{background:var(--t-lock-bg);border-color:var(--t-lock-bdr)}
+.lock.lk{background:rgba(255,62,108,.05);border-color:rgba(255,62,108,.3)}
+.lock:active{transform:scale(.98)}
+.lk-icon{font-size:20px}
+.lk-label{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:800;letter-spacing:2px}
+.lk-hint{font-size:13px;font-weight:600;color:var(--t-dim)}
 
-/* Team columns */
-.teams-grid{display:flex;gap:6px;margin-top:8px}
-.team-col{flex:1;background:var(--t-s1);border-radius:10px;overflow:hidden;border:1px solid;display:flex;flex-direction:column}
-.team-hdr{padding:8px 10px;display:flex;flex-direction:column;gap:5px}
-.team-title{display:flex;align-items:center;gap:6px}
-.team-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.team-name{font-size:14px;font-weight:700;letter-spacing:1px}
-.team-count{font-size:11px;color:var(--t-dim)}
-.team-pen{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;color:var(--t-orange);letter-spacing:1px;cursor:pointer;text-align:center;border:1px solid rgba(255,145,0,.25);background:rgba(255,145,0,.06);transition:all .2s}
-.team-pen:hover,.team-pen:focus-visible{background:rgba(255,145,0,.15);outline:none}
-.team-players{padding:6px 8px;display:flex;flex-direction:column;gap:3px;flex:1}
-.tp{display:flex;align-items:center;gap:6px;padding:4px;font-size:13px;border-radius:5px}
-.tp-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.tp-name{flex:1;font-weight:600}
-.tp-idle{font-size:10px;font-weight:700;color:var(--t-orange);letter-spacing:1px}
-.tp-kick{font-size:10px;padding:2px 8px;border-radius:4px;background:var(--t-s2);color:var(--t-dim);cursor:pointer;border:none;font-family:'Rajdhani',sans-serif;font-weight:600;transition:all .15s}
-.tp-kick:hover,.tp-kick:focus-visible{color:var(--t-secondary);outline:none}
+/* Teams */
+.tgrid{display:flex;gap:6px;margin-top:8px}
+.tcol{flex:1;background:var(--t-card-bg);border-radius:12px;overflow:hidden;border:2px solid;display:flex;flex-direction:column}
+.thdr{padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.ttitle{display:flex;align-items:center;gap:8px}
+.tdot{width:10px;height:10px;border-radius:50%}
+.tname{font-size:15px;font-weight:800;letter-spacing:1px}
+.tcnt{font-size:13px;font-weight:700;color:var(--t-dim)}
+.tpen{padding:7px 12px;border-radius:8px;font-size:13px;font-weight:800;color:var(--t-orange);letter-spacing:1px;cursor:pointer;text-align:center;border:2px solid var(--t-penalty-bdr);background:var(--t-penalty-bg);transition:all .2s}
+.tpen:hover{background:rgba(255,145,0,.15)}
+.tpen:active{transform:scale(.96)}
+.tplayers{padding:8px 10px;display:flex;flex-direction:column;gap:4px;flex:1}
+.tp{display:flex;align-items:center;gap:8px;padding:5px;font-size:14px;font-weight:700;border-radius:6px}
+.tp-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.tp-name{flex:1}
+.tp-idle{font-size:11px;font-weight:800;color:var(--t-orange)}
+.tp-kick{font-size:12px;font-weight:700;padding:3px 10px;border-radius:6px;background:var(--t-s2);color:var(--t-dim);cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s}
+.tp-kick:hover{color:var(--t-secondary)}
+.tp-kick:active{transform:scale(.94)}
 
 /* No team */
-.no-team{background:var(--t-s1);border:1px solid var(--t-bdr);border-radius:10px;padding:8px 10px;margin-top:6px}
-.no-team-hd{font-size:12px;color:var(--t-dim);letter-spacing:1px;margin-bottom:4px}
+.noteam{background:var(--t-card-bg);border:2px solid var(--t-bdr);border-radius:12px;padding:10px 12px;margin-top:6px}
+.noteam-hd{font-size:13px;font-weight:700;color:var(--t-dim);letter-spacing:1px;margin-bottom:4px}
 
-.theme-btn{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;padding:8px 14px;border-radius:8px;border:2px solid var(--t-bdr);background:var(--t-s2);color:var(--t-dim);cursor:pointer;transition:all .2s;letter-spacing:1px}
-.theme-btn:hover,.theme-btn:focus-visible{border-color:var(--t-primary);color:var(--t-primary);outline:none}
-.theme-btn.active{border-color:var(--t-primary);color:var(--t-primary);background:var(--t-s1)}
+/* Round history */
+.hist{margin-top:8px;background:var(--t-card-bg);border:2px solid var(--t-bdr);border-radius:12px;overflow:hidden}
+.hist-hd{font-size:13px;font-weight:800;color:var(--t-dim);letter-spacing:2px;text-transform:uppercase;padding:10px 12px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;-webkit-tap-highlight-color:transparent}
+.hist-list{display:none;padding:0 12px 10px;flex-direction:column;gap:3px}.hist-list.open{display:flex}
+.hist-item{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;padding:4px 0}
+.hist-num{font-family:'Bebas Neue',sans-serif;font-size:16px;width:24px;color:var(--t-dim)}
 
-.snd-badge{position:fixed;top:8px;right:8px;font-size:11px;color:var(--t-dim);background:var(--t-s1);border:1px solid var(--t-bdr);padding:4px 10px;border-radius:16px;z-index:100;cursor:pointer;transition:all .2s}
-.snd-badge:hover,.snd-badge:focus-visible{border-color:var(--t-primary);outline:none}
+/* Theme */
+.theme-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--t-card-bg);border:2px solid var(--t-bdr);border-radius:12px;margin-top:8px;flex-wrap:wrap}
+.theme-row label{font-size:13px;font-weight:700;color:var(--t-dim);letter-spacing:2px;text-transform:uppercase;width:100%}
+.tbtn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;padding:8px 16px;border-radius:10px;border:2px solid var(--t-bdr);background:var(--t-s2);color:var(--t-dim);cursor:pointer;transition:all .2s;letter-spacing:1px}
+.tbtn:hover,.tbtn:focus-visible{border-color:var(--t-primary);color:var(--t-primary);outline:none}
+.tbtn.on{border-color:var(--t-primary);color:var(--t-primary);background:var(--t-s1)}
+.tbtn:active{transform:scale(.95)}
+
+.snd{position:fixed;top:10px;right:10px;font-size:13px;font-weight:700;color:var(--t-dim);background:var(--t-s1);border:2px solid var(--t-bdr);padding:6px 12px;border-radius:20px;z-index:100;cursor:pointer}
+.snd:hover{border-color:var(--t-primary)}
 </style>
 </head>
 <body>
 
-<button class="snd-badge" id="sndB" onclick="toggleSnd()" aria-label="Toggle sound effects">🔊 Sound on</button>
+<button class="snd" id="sndB" onclick="toggleSnd()" aria-label="Toggle sound">🔊</button>
 
-<!-- QR Overlay -->
-<div class="qr-overlay" id="qrOverlay" role="dialog" aria-label="QR Code to join room">
-  <div class="qr-card">
-    <div id="qrBox" style="width:180px;height:180px;margin:0 auto"></div>
-    <div class="qr-url" id="qrUrl"></div>
-  </div>
-  <button class="qr-close" onclick="closeQR()" aria-label="Close QR code popup">Close</button>
-</div>
+<div class="qro" id="qro" role="dialog" aria-label="QR Code"><div class="qr-card"><div id="qrBox" style="width:200px;height:200px;margin:0 auto"></div><div class="qr-url" id="qrUrl"></div></div><button class="qr-close" onclick="closeQR()" aria-label="Close">Close</button></div>
 
 <main>
-  <!-- Setup (auto-creates) -->
-  <div class="scr on" id="scrSetup">
-    <div class="setup-card">
-      <div class="setup-msg" role="status" aria-live="polite">Creating room…</div>
-      <div class="setup-err" id="setupErr" role="alert"></div>
-    </div>
-  </div>
+  <div class="scr on" id="s0"><div class="setup"><div class="setup-msg">Creating room…</div><div class="setup-err" id="sErr" role="alert"></div></div></div>
 
-  <!-- Game -->
-  <div class="scr" id="scrGame">
-    <!-- Header -->
-    <header>
-      <div class="hbar">
-        <a href="index.html" class="back-btn" aria-label="Back to home">←</a>
-        <div class="hbar-logo" id="stdLogo">BUZZER</div>
-        <img id="aldewaniahLogo" src="aldewaniah-logo.png" alt="الديوانية" style="display:none;height:32px;object-fit:contain">
-        <div class="hbar-code" id="rcCode" aria-label="Room code"></div>
-        <button class="icon-btn" onclick="openQR()" aria-label="Show QR code to join">⊞</button>
-      </div>
-    </header>
+  <div class="scr" id="s1">
+    <header><div class="hbar">
+      <a href="index.html" class="back" aria-label="Home">←</a>
+      <div class="hlogo" id="stdLogo">BUZZER</div>
+      <img id="aldewaniahLogo" src="aldewaniah-logo.png" alt="الديوانية" style="display:none;height:34px;object-fit:contain">
+      <div class="hcode" id="rc"></div>
+      <button class="ibtn" onclick="openQR()" aria-label="Show QR code">⊞</button>
+    </div></header>
 
-    <!-- The Box — single interactive card: press to begin, shows buzzer, press again to restart -->
     <section class="the-box" id="theBox" onclick="onBoxTap()" role="button" tabindex="0" aria-label="Press to start round">
-      <div class="box-label" id="boxLabel">Press to begin</div>
-      <div class="box-team" id="boxTeam">&nbsp;</div>
-      <div class="box-name" id="boxName">&nbsp;</div>
-      <div class="box-timer" id="boxTimer">&nbsp;</div>
-      <div class="box-sub" id="boxSub">&nbsp;</div>
-      <button class="bz-more" id="saBtn" style="visibility:hidden" onclick="event.stopPropagation();toggleSA()" aria-label="Show all buzzes">▼ See all buzzes</button>
-      <div class="bz-list" id="bList" role="list"></div>
+      <div class="bx-label" id="bxL">Press to begin</div>
+      <div class="bx-team" id="bxT">&nbsp;</div>
+      <div class="bx-name" id="bxN">&nbsp;</div>
+      <div class="bx-timer" id="bxC">&nbsp;</div>
+      <div class="bx-sub" id="bxS">&nbsp;</div>
+      <button class="bx-more" id="saBtn" style="visibility:hidden" onclick="event.stopPropagation();toggleSA()" aria-label="See all buzzes">▼ See all buzzes</button>
+      <div class="bx-list" id="bList" role="list"></div>
     </section>
 
-    <!-- Timer setting (small, separate from the box) -->
-    <div class="timer-setting">
-      <label for="timerInput">Timer</label>
-      <input class="timer-input" id="timerInput" type="number" min="1" max="60" value="3" aria-label="Timer duration in seconds" onchange="onTimerChange(this.value)">
-      <span class="timer-unit">sec</span>
+    <div class="tmr">
+      <label for="tmrIn">Timer</label>
+      <input class="tmr-in" id="tmrIn" type="number" min="1" max="60" value="3" aria-label="Seconds" onchange="onTmrChange(this.value)">
+      <span class="tmr-u">sec</span>
     </div>
 
-    <!-- Lock toggle -->
-    <div class="lock-toggle unlocked" id="lockToggle" onclick="toggleLock()" role="switch" aria-checked="false" aria-label="Lock or unlock teams" tabindex="0">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="lock-icon" id="lockIcon">🔓</span>
-        <span class="lock-label" id="lockLabel" style="color:var(--t-green)">Teams unlocked</span>
-      </div>
-      <span class="lock-hint">tap to lock</span>
+    <div class="lock un" id="lockT" onclick="toggleLock()" role="switch" aria-checked="false" aria-label="Lock teams" tabindex="0">
+      <div style="display:flex;align-items:center;gap:10px"><span class="lk-icon" id="lkI">🔓</span><span class="lk-label" id="lkL" style="color:var(--t-green)">Teams unlocked</span></div>
+      <span class="lk-hint">tap to lock</span>
     </div>
 
-    <!-- Teams grid -->
-    <div class="teams-grid" id="teamsGrid" aria-label="Teams"></div>
+    <div class="tgrid" id="tGrid" aria-label="Teams"></div>
+    <div class="noteam" id="ntBox" style="display:none"><div class="noteam-hd">No team</div><div id="ntList"></div></div>
 
-    <!-- No-team players -->
-    <div class="no-team" id="noTeamBox" style="display:none" aria-label="Players without a team">
-      <div class="no-team-hd">No team</div>
-      <div id="noTeamList"></div>
+    <div class="hist" id="histBox" style="display:none">
+      <div class="hist-hd" onclick="toggleHist()">Round history <span id="histArrow">▼</span></div>
+      <div class="hist-list" id="histList"></div>
     </div>
 
-    <!-- Theme picker -->
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--t-card-bg);border:1px solid var(--t-card-bdr);border-radius:10px;margin-top:8px;flex-wrap:wrap">
-      <label style="font-size:12px;color:var(--t-dim);letter-spacing:2px;text-transform:uppercase;font-weight:600;width:100%">Theme (syncs to all players)</label>
-      <div id="themeBtns" style="display:flex;gap:4px;flex-wrap:wrap;width:100%"></div>
+    <div class="theme-row">
+      <label>Theme (syncs to all)</label>
+      <div id="thmBtns" style="display:flex;gap:4px;flex-wrap:wrap"></div>
     </div>
   </div>
 </main>
 
 <script>
 let host=null,sndOn=true,saOpen=false,timerInt=null,lobbyData={players:[],teams:[],teamsLocked:false};
-let roundState='idle'; // idle | armed | buzzed | expired
+let roundState='idle',histOpen=false;
 
-function toggleSnd(){sndOn=!sndOn;document.getElementById('sndB').textContent=sndOn?'🔊 Sound on':'🔇 Sound off';}
-function openQR(){document.getElementById('qrOverlay').classList.add('on');}
-function closeQR(){document.getElementById('qrOverlay').classList.remove('on');}
+function toggleSnd(){sndOn=!sndOn;document.getElementById('sndB').textContent=sndOn?'🔊':'🔇';}
+function openQR(){document.getElementById('qro').classList.add('on');}
+function closeQR(){document.getElementById('qro').classList.remove('on');}
 
-window.addEventListener('DOMContentLoaded',()=>{doCreate();renderThemePicker();});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeQR();});
+window.addEventListener('DOMContentLoaded',()=>{doCreate();renderThemes();});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeQR();
+  if(e.key===' '||e.key==='Enter'){if(document.activeElement===document.getElementById('theBox')||document.activeElement===document.body)onBoxTap();}
+});
 
 async function doCreate(){
-  document.getElementById('setupErr').textContent='';
-  host=new BuzzerHost(onHostUpdate);
-  try{const code=await host.create();showGame(code);}
-  catch(e){document.getElementById('setupErr').textContent=e.message||'Failed to create room';}
+  document.getElementById('sErr').textContent='';
+  host=new BuzzerHost(onUpdate);
+  try{const code=await host.create();showGame(code);}catch(e){document.getElementById('sErr').textContent=e.message||'Failed';}
 }
-
 function showGame(code){
-  document.getElementById('scrSetup').classList.remove('on');
-  document.getElementById('scrGame').classList.add('on');
-  document.getElementById('rcCode').textContent=code;
-  const url=host.getJoinURL();
-  document.getElementById('qrUrl').textContent=url;
+  document.getElementById('s0').classList.remove('on');
+  document.getElementById('s1').classList.add('on');
+  document.getElementById('rc').textContent=code;
+  const url=host.getJoinURL();document.getElementById('qrUrl').textContent=url;
   const qb=document.getElementById('qrBox');qb.innerHTML='';
-  new QRCode(qb,{text:url,width:170,height:170,colorDark:'#00E5FF',colorLight:'#06060C',correctLevel:QRCode.CorrectLevel.M});
+  new QRCode(qb,{text:url,width:190,height:190,colorDark:'#00E5FF',colorLight:'#06060C',correctLevel:QRCode.CorrectLevel.M});
   setBoxIdle();
 }
-
-function onHostUpdate(msg){
+function onUpdate(msg){
   switch(msg.type){
     case'lobby':lobbyData=msg;renderLobby();break;
     case'first_buzz':showFirst(msg);break;
     case'buzz_list':showBuzzList(msg.buzzes);break;
     case'team_penalized':renderLobby();break;
+    case'history_update':renderHistory(msg.history);break;
   }
 }
 
-// === The Box — single interactive card ===
+// ═══ THE BOX ═══
 function setBoxIdle(){
-  roundState='idle';
-  const box=document.getElementById('theBox');
-  box.className='the-box';
-  box.style.borderColor='';
-  document.getElementById('boxLabel').textContent='Press to begin';
-  document.getElementById('boxLabel').style.color='';
-  document.getElementById('boxTeam').innerHTML='&nbsp;';
-  document.getElementById('boxName').innerHTML='&nbsp;';
-  document.getElementById('boxName').style.color='';
-  document.getElementById('boxName').style.textShadow='none';
-  document.getElementById('boxTimer').innerHTML='&nbsp;';
-  document.getElementById('boxTimer').style.color='';
-  document.getElementById('boxTimer').style.opacity='1';
-  document.getElementById('boxSub').innerHTML='&nbsp;';
-  document.getElementById('saBtn').style.visibility='hidden';
-  document.getElementById('bList').classList.remove('open');
-  document.getElementById('bList').innerHTML='';
-  saOpen=false;
+  roundState='idle';const b=document.getElementById('theBox');b.className='the-box';b.style.borderColor='';
+  document.getElementById('bxL').textContent='Press to begin';document.getElementById('bxL').style.color='';
+  document.getElementById('bxT').innerHTML='&nbsp;';document.getElementById('bxN').innerHTML='&nbsp;';
+  document.getElementById('bxN').style.color='';document.getElementById('bxN').style.textShadow='none';
+  document.getElementById('bxC').innerHTML='&nbsp;';document.getElementById('bxC').style.color='';document.getElementById('bxC').style.opacity='1';
+  document.getElementById('bxS').innerHTML='&nbsp;';
+  document.getElementById('saBtn').style.visibility='hidden';document.getElementById('bList').classList.remove('open');document.getElementById('bList').innerHTML='';saOpen=false;
   if(timerInt){clearInterval(timerInt);timerInt=null;}
-  // Disable if no players
-  if((lobbyData.players||[]).length===0) box.classList.add('disabled');
+  if((lobbyData.players||[]).length===0)b.classList.add('disabled');
 }
-
 function setBoxWaiting(){
-  roundState='armed';
-  const box=document.getElementById('theBox');
-  box.className='the-box waiting';
-  document.getElementById('boxLabel').textContent='Waiting for buzz…';
-  document.getElementById('boxLabel').style.color='var(--t-primary)';
-  document.getElementById('boxTeam').innerHTML='&nbsp;';
-  document.getElementById('boxName').innerHTML='&nbsp;';
-  document.getElementById('boxName').style.color='';
-  document.getElementById('boxName').style.textShadow='none';
-  document.getElementById('boxTimer').innerHTML='&nbsp;';
-  document.getElementById('boxTimer').style.color='var(--t-primary)';
-  document.getElementById('boxTimer').style.opacity='1';
-  document.getElementById('boxSub').innerHTML='&nbsp;';
-  document.getElementById('saBtn').style.visibility='hidden';
-  document.getElementById('bList').classList.remove('open');
-  document.getElementById('bList').innerHTML='';
-  saOpen=false;
+  roundState='armed';const b=document.getElementById('theBox');b.className='the-box waiting';
+  document.getElementById('bxL').textContent='Waiting for buzz…';document.getElementById('bxL').style.color='var(--t-primary)';
+  document.getElementById('bxT').innerHTML='&nbsp;';document.getElementById('bxN').innerHTML='&nbsp;';
+  document.getElementById('bxN').style.color='';document.getElementById('bxN').style.textShadow='none';
+  document.getElementById('bxC').innerHTML='&nbsp;';document.getElementById('bxC').style.color='var(--t-primary)';document.getElementById('bxC').style.opacity='1';
+  document.getElementById('bxS').innerHTML='&nbsp;';
+  document.getElementById('saBtn').style.visibility='hidden';document.getElementById('bList').classList.remove('open');document.getElementById('bList').innerHTML='';saOpen=false;
 }
-
 function showFirst(msg){
-  roundState='buzzed';
-  if(sndOn)playSound('buzz');
-  const box=document.getElementById('theBox');
-  box.className='the-box buzzed';
-  box.style.borderColor=msg.color;
-  const teamInfo=msg.team&&lobbyData.teams.find(t=>t.id===msg.team);
-  document.getElementById('boxLabel').textContent='🏆 First Buzzer';
-  document.getElementById('boxLabel').style.color='';
-  document.getElementById('boxTeam').textContent=teamInfo?teamInfo.name:' ';
-  document.getElementById('boxTeam').style.color=teamInfo?teamInfo.color:'';
-  document.getElementById('boxName').textContent=msg.name;
-  document.getElementById('boxName').style.color=msg.color;
-  document.getElementById('boxName').style.textShadow='0 0 14px '+msg.color;
-  document.getElementById('boxSub').textContent='Answer time';
-
+  roundState='buzzed';if(sndOn)playSound('buzz');
+  const b=document.getElementById('theBox');b.className='the-box buzzed';b.style.borderColor=msg.color;
+  const ti=msg.team&&lobbyData.teams.find(t=>t.id===msg.team);
+  document.getElementById('bxL').textContent='First Buzzer';document.getElementById('bxL').style.color='';
+  document.getElementById('bxT').textContent=ti?ti.name:' ';document.getElementById('bxT').style.color=ti?ti.color:'';
+  document.getElementById('bxN').textContent=msg.name;document.getElementById('bxN').style.color=msg.color;document.getElementById('bxN').style.textShadow='0 0 16px '+msg.color;
+  document.getElementById('bxS').textContent='Answer time';
   let rem=msg.timerDuration;
-  document.getElementById('boxTimer').textContent=rem.toFixed(1)+'s';
-  document.getElementById('boxTimer').style.color=msg.color;
-  document.getElementById('boxTimer').style.opacity='1';
-
-  if(timerInt)clearInterval(timerInt);
-  const t0=Date.now();
-  timerInt=setInterval(()=>{
-    rem=Math.max(0,msg.timerDuration-(Date.now()-t0)/1000);
-    const cd=document.getElementById('boxTimer');
-    if(cd){
-      cd.textContent=rem.toFixed(1)+'s';
-      if(rem<=0){
-        clearInterval(timerInt);timerInt=null;
-        cd.style.opacity='.3';
-        onTimerExpired();
-      }
-    }
-  },50);
+  document.getElementById('bxC').textContent=rem.toFixed(1)+'s';document.getElementById('bxC').style.color=msg.color;document.getElementById('bxC').style.opacity='1';
+  if(timerInt)clearInterval(timerInt);const t0=Date.now();
+  timerInt=setInterval(()=>{rem=Math.max(0,msg.timerDuration-(Date.now()-t0)/1000);const c=document.getElementById('bxC');if(c){c.textContent=rem.toFixed(1)+'s';if(rem<=0){clearInterval(timerInt);timerInt=null;c.style.opacity='.3';onExpired();}}},50);
 }
-
-function onTimerExpired(){
-  roundState='expired';
-  document.getElementById('boxSub').textContent='Press to start next round';
-  document.getElementById('theBox').className='the-box expired';
-}
-
+function onExpired(){roundState='expired';document.getElementById('bxS').textContent='Press for next round';document.getElementById('theBox').className='the-box expired';}
 function onBoxTap(){
   if(roundState==='idle'){
-    // Start round
-    if((lobbyData.players||[]).length===0) return;
-    host.setTimer(document.getElementById('timerInput').value);
-    host.armRound();
-    if(sndOn)playSound('arm');
-    setBoxWaiting();
-  } else if(roundState==='expired'||roundState==='buzzed'){
-    // Reset and start new round
-    host.resetRound();
-    setBoxIdle();
-    setTimeout(()=>{
-      if((lobbyData.players||[]).length===0) return;
-      host.setTimer(document.getElementById('timerInput').value);
-      host.armRound();
-      if(sndOn)playSound('arm');
-      setBoxWaiting();
-    },150);
+    if((lobbyData.players||[]).length===0)return;
+    host.setTimer(document.getElementById('tmrIn').value);host.armRound();if(sndOn)playSound('arm');setBoxWaiting();
+  }else if(roundState==='expired'||roundState==='buzzed'){
+    host.resetRound();setBoxIdle();
+    setTimeout(()=>{if((lobbyData.players||[]).length===0)return;host.setTimer(document.getElementById('tmrIn').value);host.armRound();if(sndOn)playSound('arm');setBoxWaiting();},120);
   }
 }
-
 function showBuzzList(buzzes){
-  if(buzzes.length>1){
-    document.getElementById('saBtn').style.visibility='visible';
-    document.getElementById('saBtn').textContent=(saOpen?'▲ Hide':'▼ See all')+' buzzes ('+buzzes.length+')';
-  }
-  document.getElementById('bList').innerHTML=buzzes.slice(1).map(b=>
-    '<div class="bz-item" role="listitem"><span class="bz-ord" style="color:'+b.color+'">#'+b.order+'</span><span class="bz-dot" style="background:'+b.color+'"></span><span style="flex:1;font-weight:600">'+esc(b.name)+'</span><span class="bz-gap">+'+b.gap+'ms</span></div>'
-  ).join('');
+  if(buzzes.length>1){document.getElementById('saBtn').style.visibility='visible';document.getElementById('saBtn').textContent=(saOpen?'▲ Hide':'▼ See all')+' buzzes ('+buzzes.length+')';}
+  document.getElementById('bList').innerHTML=buzzes.slice(1).map(b=>'<div class="bx-item"><span class="bx-ord" style="color:'+b.color+'">#'+b.order+'</span><span class="bx-dot" style="background:'+b.color+'"></span><span style="flex:1">'+esc(b.name)+'</span><span class="bx-gap">+'+b.gap+'ms</span></div>').join('');
 }
+function toggleSA(){saOpen=!saOpen;document.getElementById('bList').classList.toggle('open',saOpen);const b=document.getElementById('saBtn'),n=b.textContent.match(/\(\d+\)/)?.[0]||'';b.textContent=(saOpen?'▲ Hide':'▼ See all')+' buzzes '+n;}
 
-function toggleSA(){
-  saOpen=!saOpen;
-  document.getElementById('bList').classList.toggle('open',saOpen);
-  const btn=document.getElementById('saBtn'),n=btn.textContent.match(/\(\d+\)/)?.[0]||'';
-  btn.textContent=(saOpen?'▲ Hide':'▼ See all')+' buzzes '+n;
+// ═══ LOBBY ═══
+function renderLobby(){
+  const{players,teams,teamsLocked}=lobbyData;
+  const box=document.getElementById('theBox');if(roundState==='idle'){if(players.length===0)box.classList.add('disabled');else box.classList.remove('disabled');}
+  // Lock
+  const lt=document.getElementById('lockT'),li=document.getElementById('lkI'),ll=document.getElementById('lkL');
+  if(teamsLocked){lt.className='lock lk';li.textContent='🔒';ll.textContent='Teams locked';ll.style.color='var(--t-secondary)';lt.setAttribute('aria-checked','true');}
+  else{lt.className='lock un';li.textContent='🔓';ll.textContent='Teams unlocked';ll.style.color='var(--t-green)';lt.setAttribute('aria-checked','false');}
+  // Teams
+  const g=document.getElementById('tGrid'),tpm={};
+  players.forEach(p=>{if(p.team)(tpm[p.team]=tpm[p.team]||[]).push(p);});
+  if(teams.length>0){g.innerHTML=teams.map(t=>{const tp=tpm[t.id]||[];return '<div class="tcol" style="border-color:'+t.color+'25"><div class="thdr" style="background:'+t.color+'0C"><div class="ttitle"><div class="tdot" style="background:'+t.color+'"></div><span class="tname" style="color:'+t.color+'">'+esc(t.name)+'</span><span class="tcnt">'+tp.length+'</span></div><button class="tpen" onclick="event.stopPropagation();penT(\''+t.id+'\')" aria-label="Penalize '+esc(t.name)+'">⚠ Penalize</button></div><div class="tplayers">'+tp.map(p=>pRow(p)).join('')+'</div></div>';}).join('');}
+  else{g.innerHTML='<div style="flex:1;text-align:center;padding:16px;color:var(--t-dim);font-size:14px;font-weight:700">Players create teams from their screen</div>';}
+  // No team
+  const nt=players.filter(p=>!p.team),nb=document.getElementById('ntBox');
+  if(nt.length>0){nb.style.display='block';document.getElementById('ntList').innerHTML=nt.map(p=>pRow(p)).join('');}else nb.style.display='none';
 }
-
-function renderLobby(){  const{players,teams,teamsLocked}=lobbyData;
-  const box=document.getElementById('theBox');if(players.length===0)box.classList.add('disabled');else box.classList.remove('disabled');
-
-  // Lock toggle
-  const lt=document.getElementById('lockToggle');
-  const li=document.getElementById('lockIcon');
-  const ll=document.getElementById('lockLabel');
-  const lh=lt.querySelector('.lock-hint');
-  if(teamsLocked){lt.className='lock-toggle locked';li.textContent='🔒';ll.textContent='Teams locked';ll.style.color='var(--t-secondary)';lh.textContent='tap to unlock';lt.setAttribute('aria-checked','true');}
-  else{lt.className='lock-toggle unlocked';li.textContent='🔓';ll.textContent='Teams unlocked';ll.style.color='var(--t-green)';lh.textContent='tap to lock';lt.setAttribute('aria-checked','false');}
-
-  // Team columns
-  const grid=document.getElementById('teamsGrid');
-  const teamPlayerMap={};
-  players.forEach(p=>{if(p.team){(teamPlayerMap[p.team]=teamPlayerMap[p.team]||[]).push(p);}});
-
-  if(teams.length>0){
-    grid.innerHTML=teams.map(t=>{
-      const tp=teamPlayerMap[t.id]||[];
-      return `<div class="team-col" style="border-color:${t.color}25">
-        <div class="team-hdr" style="background:${t.color}0C">
-          <div class="team-title">
-            <div class="team-dot" style="background:${t.color};box-shadow:0 0 5px ${t.color}55"></div>
-            <span class="team-name" style="color:${t.color}">${esc(t.name)}</span>
-            <span class="team-count">${tp.length}</span>
-          </div>
-          <button class="team-pen" onclick="penTeam('${t.id}')" aria-label="Penalize team ${esc(t.name)} for 10 seconds">⚠ Penalize</button>
-        </div>
-        <div class="team-players">${tp.map(p=>playerRow(p)).join('')}</div>
-      </div>`;
-    }).join('');
-  } else {
-    grid.innerHTML='<div style="flex:1;text-align:center;padding:16px;color:var(--t-dim);font-size:13px">Players create teams from their screen</div>';
-  }
-
-  // No-team players
-  const noTeam=players.filter(p=>!p.team);
-  const ntBox=document.getElementById('noTeamBox');
-  if(noTeam.length>0){
-    ntBox.style.display='block';
-    document.getElementById('noTeamList').innerHTML=noTeam.map(p=>playerRow(p)).join('');
-  } else {ntBox.style.display='none';}
-}
-
-function playerRow(p){
-  const idle=p.idle?'<span class="tp-idle">IDLE</span>':'';
-  return `<div class="tp" style="opacity:${p.idle?.4:1}">
-    <div class="tp-dot" style="background:${p.color}"></div>
-    <span class="tp-name">${esc(p.name)}</span>${idle}
-    <button class="tp-kick" onclick="kickP('${p.id}')" aria-label="Kick ${esc(p.name)}">kick</button>
-  </div>`;
-}
-
+function pRow(p){return '<div class="tp" style="opacity:'+(p.idle?.35:1)+'"><div class="tp-dot" style="background:'+p.color+'"></div><span class="tp-name">'+esc(p.name)+'</span>'+(p.idle?'<span class="tp-idle">IDLE</span>':'')+'<button class="tp-kick" onclick="event.stopPropagation();kickP(\''+p.id+'\')" aria-label="Kick '+esc(p.name)+'">kick</button></div>';}
 function toggleLock(){if(lobbyData.teamsLocked)host.unlockTeams();else host.lockTeams();}
-function penTeam(tid){host.penalizeTeam(tid);}
+function penT(tid){host.penalizeTeam(tid);}
 function kickP(pid){host.kickPlayer(pid);}
-function onTimerChange(v){host.setTimer(v);}
+function onTmrChange(v){host.setTimer(v);}
 
-// Theme system
+// ═══ HISTORY ═══
+function renderHistory(h){
+  if(!h||h.length===0){document.getElementById('histBox').style.display='none';return;}
+  document.getElementById('histBox').style.display='block';
+  document.getElementById('histList').innerHTML=h.slice().reverse().map(r=>'<div class="hist-item"><span class="hist-num">'+r.round+'</span><span class="bx-dot" style="background:'+r.color+'"></span><span style="flex:1;font-weight:700">'+esc(r.name)+'</span>'+(r.team?'<span style="font-size:11px;font-weight:700;color:'+(r.teamColor||'var(--t-dim)')+'">'+esc(r.team)+'</span>':'')+'</div>').join('');
+}
+function toggleHist(){histOpen=!histOpen;document.getElementById('histList').classList.toggle('open',histOpen);document.getElementById('histArrow').textContent=histOpen?'▲':'▼';}
+
+// ═══ THEMES ═══
 let activeTheme='neon';
-function renderThemePicker(){
-  const list=getThemeList();
-  document.getElementById('themeBtns').innerHTML=list.map(t=>
-    `<button class="theme-btn ${t.id===activeTheme?'active':''}" onclick="changeTheme('${t.id}')" aria-label="Switch to ${t.name} theme">${t.name}</button>`
-  ).join('');
-}
-function changeTheme(id){
-  activeTheme=id;
-  applyTheme(id);
-  if(host) host.setTheme(id);
-  renderThemePicker();
-}
-// Render on load
-window.addEventListener('DOMContentLoaded',()=>{renderThemePicker();});
+function renderThemes(){document.getElementById('thmBtns').innerHTML=getThemeList().map(t=>'<button class="tbtn '+(t.id===activeTheme?'on':'')+'" onclick="chTheme(\''+t.id+'\')" aria-label="'+t.name+' theme">'+t.name+'</button>').join('');}
+function chTheme(id){activeTheme=id;applyTheme(id);if(host)host.setTheme(id);renderThemes();}
 </script>
 </body>
 </html>
