@@ -110,6 +110,15 @@ main{position:relative;z-index:1;width:100%;max-width:480px;padding:env(safe-are
 .res-pen{font-family:'Bebas Neue',sans-serif;font-size:clamp(24px,7vw,36px);color:var(--t-orange)}
 .res-who{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,5vw,26px)}
 
+/* Celebration animation */
+.celebrate{position:fixed;inset:0;pointer-events:none;z-index:800;overflow:hidden}
+.celebrate .burst{position:absolute;top:50%;left:50%;width:200vw;height:200vw;margin:-100vw 0 0 -100vw;border-radius:50%;animation:burstOut .8s ease-out forwards;opacity:0}
+@keyframes burstOut{0%{transform:scale(0);opacity:.4}100%{transform:scale(1);opacity:0}}
+.celebrate .star{position:absolute;font-size:clamp(20px,6vw,32px);animation:starFly 1.2s ease-out forwards;opacity:0}
+@keyframes starFly{0%{transform:translate(0,0) scale(0) rotate(0deg);opacity:1}60%{opacity:1}100%{transform:translate(var(--tx,20vw),var(--ty,-20vh)) scale(1.2) rotate(360deg);opacity:0}}
+.celebrate .ring{position:absolute;top:50%;left:50%;border-radius:50%;border:3px solid;animation:ringGrow 1s ease-out forwards;opacity:0}
+@keyframes ringGrow{0%{width:0;height:0;margin:0;opacity:.8}100%{width:120vw;height:120vw;margin:-60vw 0 0 -60vw;opacity:0}}
+
 .overlay{position:fixed;inset:0;background:var(--t-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;padding:24px}
 .overlay-logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:6px;background:var(--t-logo-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:20px}
 .overlay-t{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--t-secondary);letter-spacing:3px}
@@ -297,6 +306,7 @@ function onPlayerUpdate(msg){
     case'team_penalized':if(myTeam===msg.teamId)setPenalty(msg.seconds);break;
     case'player_penalized':if(player&&msg.playerId===player.myId)setPenalty(msg.seconds);break;
     case'timer_expired':pSound('timeup');showToast('Time up!','warning');break;
+    case'correct':onCorrect(msg);break;
     case'lobby':playersData=msg.players||[];teamsData=msg.teams||[];teamsLocked=msg.teamsLocked||false;renderLobby();break;
     case'teams_locked':teamsLocked=true;renderLobby();break;case'teams_unlocked':teamsLocked=false;renderLobby();break;
     case'theme_change':if(msg.theme)applyTheme(msg.theme);break;
@@ -331,6 +341,57 @@ function setBuzzed(order,gap){state='buzzed';const b=document.getElementById('bu
 function setLocked(firstName,firstColor,firstTeam){if(state!=='armed')return;state='locked';const b=document.getElementById('buzzBtn');b.className='bbtn done';b.disabled=true;b.querySelector('.bt').textContent='✕';b.style.background='radial-gradient(circle at 35% 35%,#333,#222,#181818)';b.style.boxShadow='none';b.setAttribute('aria-label','Locked — '+firstName+' was first');document.getElementById('stTxt').textContent='LOCKED OUT';document.getElementById('stTxt').style.color='var(--t-secondary)';const teamInfo=firstTeam&&teamsData.find(t=>t.id===firstTeam);const teamStr=teamInfo?' <span style="font-size:.7em;color:'+teamInfo.color+'">'+esc(teamInfo.name)+'</span>':'';document.getElementById('resArea').innerHTML='<div class="res-who" style="color:'+firstColor+'">'+esc(firstName)+' was first'+teamStr+'</div>';}
 function setPenalty(seconds){pSound('penalty');const b=document.getElementById('buzzBtn');b.className='bbtn penalty';b.disabled=true;b.querySelector('.bt').textContent='⚠';b.style.background='radial-gradient(circle at 35% 35%,#553300,#332200,#221100)';b.style.boxShadow='0 0 30px rgba(255,145,0,.1)';b.setAttribute('aria-label','Penalty — '+seconds+'s');document.getElementById('stTxt').textContent='PENALTY';document.getElementById('stTxt').style.color='var(--t-orange)';let rem=seconds;document.getElementById('resArea').innerHTML='<div class="res-pen" id="penCd">'+rem+'</div>';if(penaltyTimer)clearInterval(penaltyTimer);penaltyTimer=setInterval(()=>{rem--;const el=document.getElementById('penCd');if(el)el.textContent=rem;if(rem<=0){clearInterval(penaltyTimer);penaltyTimer=null;setArmed();}},1000);state='penalty';}
 function doBuzz(){if(!player)return;if(lobbyOpen)toggleLobby();player.buzz();}
+
+function onCorrect(msg){
+  const isMe=player&&msg.playerId===player.myId;
+  if(isMe){
+    // I got it right — celebrate!
+    pSound('buzz');
+    document.getElementById('stTxt').textContent='✓ CORRECT!';
+    document.getElementById('stTxt').style.color='var(--t-green)';
+    document.getElementById('resArea').innerHTML='<div class="res-ord" style="color:var(--t-green)">🏆 ✓</div>';
+    const b=document.getElementById('buzzBtn');
+    b.className='bbtn done';b.disabled=true;
+    b.querySelector('.bt').textContent='✓';
+    b.style.background='radial-gradient(circle at 35% 35%,#2a5a2a,#1a4a1a,#0a3a0a)';
+    b.style.boxShadow='0 0 60px rgba(0,255,102,.3)';
+    showCelebration(myColor);
+    showToast('YOU GOT IT RIGHT!','success');
+  } else {
+    // Someone else got it right
+    document.getElementById('stTxt').textContent='✓ '+esc(msg.name).toUpperCase();
+    document.getElementById('stTxt').style.color=msg.color;
+    document.getElementById('resArea').innerHTML='<div class="res-who" style="color:'+msg.color+'">'+esc(msg.name)+' got it right</div>';
+    showToast(msg.name+' answered correctly','info');
+  }
+}
+
+function showCelebration(color){
+  const el=document.createElement('div');el.className='celebrate';
+  // Burst
+  const burst=document.createElement('div');burst.className='burst';
+  burst.style.background='radial-gradient(circle,'+color+'40,'+color+'10,transparent)';
+  el.appendChild(burst);
+  // Rings
+  for(let i=0;i<3;i++){const r=document.createElement('div');r.className='ring';r.style.borderColor=color;r.style.animationDelay=(i*0.2)+'s';el.appendChild(r);}
+  // Stars
+  const emojis=['⭐','🏆','✓','💥','🔥','✨'];
+  for(let i=0;i<14;i++){
+    const s=document.createElement('div');s.className='star';
+    s.textContent=emojis[i%emojis.length];
+    const angle=Math.random()*Math.PI*2;
+    const dist=30+Math.random()*40;
+    const tx=Math.cos(angle)*dist+'vw';
+    const ty=Math.sin(angle)*dist+'vh';
+    s.style.top='50%';s.style.left='50%';
+    s.style.animation='starFly '+(0.8+Math.random()*0.6)+'s ease-out forwards';
+    s.style.animationDelay=(Math.random()*0.3)+'s';
+    s.style.setProperty('--tx',tx);s.style.setProperty('--ty',ty);
+    el.appendChild(s);
+  }
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),2000);
+}
 function showOverlay(msg,sub){const o=document.createElement('div');o.className='overlay';o.setAttribute('role','alert');o.innerHTML='<div class="overlay-logo">BUZZER</div><div class="overlay-t">'+msg+'</div>'+(sub?'<div class="overlay-sub">'+sub+'</div>':'');document.body.appendChild(o);}
 
 // Rename

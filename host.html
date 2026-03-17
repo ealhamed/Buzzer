@@ -393,12 +393,16 @@ function judgeRight(){
   if(timerInt){clearInterval(timerInt);timerInt=null;}
   roundState='ended';
   document.getElementById('judgeBtns').style.display='none';
+  document.getElementById('skipBtn').style.display='none';
   document.getElementById('boxLabel').textContent='✓ CORRECT';
   document.getElementById('boxLabel').style.color='var(--t-green)';
   document.getElementById('boxSub').textContent='PRESS FOR NEXT ROUND';
   document.getElementById('boxTimer').textContent='';
   document.getElementById('theBox').className='the-box glass-target expired';
+  const id=lastBuzzInfo?lastBuzzInfo.id:'';
   const name=lastBuzzInfo?lastBuzzInfo.name:'?';
+  const color=lastBuzzInfo?lastBuzzInfo.color:'#fff';
+  host._broadcast({type:'correct',playerId:id,name:name,color:color});
   addLog('✓ '+name+' answered correctly','var(--t-green)');
   showToast(name+' got it right!','success');
   if(sndOn)playSound('click');
