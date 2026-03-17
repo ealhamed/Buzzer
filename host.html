@@ -130,6 +130,17 @@ main{position:relative;z-index:1;padding:env(safe-area-inset-top,8px) 12px env(s
 .theme-btn{font-size:14px;font-weight:800;padding:10px 16px;border-radius:10px;border:2px solid var(--t-bdr);background:var(--t-s2);color:var(--t-dim);cursor:pointer;transition:all .2s;letter-spacing:1px;min-height:44px}
 .theme-btn:hover{border-color:var(--t-primary);color:var(--t-primary)}
 .theme-btn.active{border-color:var(--t-primary);color:var(--t-primary);background:var(--t-s1)}
+.mode-toggle{display:flex;gap:6px;margin-bottom:8px}
+.mode-btn{flex:1;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;padding:12px;border-radius:10px;border:2px solid var(--t-bdr);background:var(--t-s2);color:var(--t-dim);cursor:pointer;transition:all .2s;min-height:44px}
+.mode-btn:hover{border-color:var(--t-primary);color:var(--t-primary)}
+.mode-btn.active{border-color:var(--t-primary);background:var(--t-primary);color:var(--t-bg)}
+.sp-hint{font-size:12px;color:var(--t-dim);line-height:1.5;font-weight:600}
+.sp-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;font-size:14px;font-weight:800;cursor:pointer;min-height:44px}
+.sp-toggle-row input{display:none}
+.sp-switch{width:44px;height:24px;background:var(--t-s2);border-radius:12px;position:relative;transition:background .2s;flex-shrink:0}
+.sp-switch::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:var(--t-dim);border-radius:50%;transition:all .2s}
+.sp-toggle-row input:checked+.sp-switch{background:var(--t-primary)}
+.sp-toggle-row input:checked+.sp-switch::after{left:22px;background:#fff}
 </style>
 </head>
 <body>
@@ -145,13 +156,24 @@ main{position:relative;z-index:1;padding:env(safe-area-inset-top,8px) 12px env(s
   <div class="sp-hd"><span class="sp-title">SETTINGS</span><button class="sp-close" onclick="closeSP()">✕</button></div>
 
   <div class="sp-group">
+    <div class="sp-label">GAME MODE</div>
+    <div class="mode-toggle" id="modeToggle">
+      <button class="mode-btn active" id="modePenalty" onclick="setGameMode('penalty')">⚠ PENALTY</button>
+      <button class="mode-btn" id="modeTimer" onclick="setGameMode('timer')">⏱ TIMER</button>
+    </div>
+    <div class="sp-hint" id="modeHint">Wrong answer → team locked out → 2nd chance for others</div>
+  </div>
+
+  <div class="sp-group">
     <div class="sp-label">ANSWER TIMER</div>
     <div class="sp-row"><label>Duration</label><input class="sp-input" id="timerInput" type="number" min="1" max="60" value="5" onchange="onTimerChange(this.value)"><span class="sp-unit">SEC</span></div>
   </div>
 
-  <div class="sp-group">
-    <div class="sp-label">PENALTY</div>
-    <div class="sp-row"><label>Duration</label><input class="sp-input" id="penaltyInput" type="number" min="1" max="60" value="10" onchange="onPenaltyChange(this.value)"><span class="sp-unit">SEC</span></div>
+  <div class="sp-group" id="penaltyGroup">
+    <div class="sp-label">PENALTY SETTINGS</div>
+    <label class="sp-toggle-row"><span>Penalize on 1st wrong</span><input type="checkbox" id="pen1stToggle" onchange="penalizeFirst=this.checked;document.getElementById('pen1stHint').textContent=this.checked?'ON: 1st wrong → team penalized immediately.':'OFF: 1st wrong passes freely. Penalty on 2nd wrong.'"><span class="sp-switch"></span></label>
+    <div class="sp-hint" id="pen1stHint">OFF: 1st wrong passes freely. Penalty on 2nd wrong.</div>
+    <div class="sp-row" style="margin-top:8px"><label>Lock-out time</label><input class="sp-input" id="penaltyInput" type="number" min="1" max="60" value="10" onchange="onPenaltyChange(this.value)"><span class="sp-unit">SEC</span></div>
   </div>
 
   <div class="sp-group">
@@ -231,7 +253,9 @@ let roundState='idle',activeTheme='thrill';
 let prevPlayerIds=new Set();
 let logOpen=false,logEntries=[],htcSelColor=0;
 let penaltyDuration=10;
-let wrongCount=0,lastBuzzInfo=null; // Track wrong answers per round
+let wrongCount=0,lastBuzzInfo=null;
+let gameMode='penalty'; // 'penalty' or 'timer'
+let penalizeFirst=false; // default: no penalty on 1st wrong // Track wrong answers per round
 let penaltyEndTimes=new Map(); // targetId → endTimestamp
 let penaltyTickInterval=null;
 
@@ -414,42 +438,59 @@ function judgeWrong(){
   const name=lastBuzzInfo?lastBuzzInfo.name:'?';
   document.getElementById('judgeBtns').style.display='none';
 
-  if(wrongCount===1){
-    // First wrong — penalize the buzzer's team or player
-    addLog('✕ '+name+' answered wrong (1st)','var(--t-secondary)');
-    showToast(name+' wrong — passing to others','warning');
+  if(gameMode==='timer'){
+    // Timer mode — no penalties, just re-arm for everyone
+    addLog('✕ '+name+' answered wrong','var(--t-secondary)');
+    showToast(name+' wrong — open to all','warning');
+    host.armed=true;host.locked=false;host.buzzes=[];
+    host._broadcast({type:'round_armed',timerDuration:host.timerDuration});
+    setBoxWaiting();
+    document.getElementById('boxLabel').textContent='OPEN TO ALL';
+    if(sndOn)playSound('penalty');
+    return;
+  }
+
+  // Penalty mode — behavior depends on penalizeFirst toggle
+  const penaltyOnThisWrong = penalizeFirst ? wrongCount : wrongCount - 1; // shift by 1 if not penalizing first
+
+  if(penaltyOnThisWrong <= 0){
+    // No penalty — just re-arm for others (1st wrong when penalizeFirst is off)
+    addLog('✕ '+name+' answered wrong — passing to others','var(--t-secondary)');
+    showToast(name+' wrong — others can try','warning');
+    host.armed=true;host.locked=false;host.buzzes=[];
+    host._broadcast({type:'round_armed',timerDuration:host.timerDuration});
+    setBoxWaiting();
+    document.getElementById('boxLabel').textContent='WAITING — NEXT CHANCE';
+  } else if(penaltyOnThisWrong===1){
+    // Penalize the buzzer's team or player
+    addLog('✕ '+name+' answered wrong — penalized','var(--t-secondary)');
+    showToast(name+' wrong — team penalized','warning');
     if(lastBuzzInfo){
       const pid=lastBuzzInfo.id;const p=host.players.get(pid);
       if(p&&p.team){
-        // Team penalty
         host.penalizeTarget(p.team);
         penaltyEndTimes.set(p.team,Date.now()+penaltyDuration*1000);
         startPenaltyTicker();
         const t=host.teams.get(p.team);
         addLog('⚠ '+(t?t.name:'Team')+' penalized '+penaltyDuration+'s','var(--t-orange)');
       } else {
-        // Individual penalty
         host.penalizeTarget(pid);
         penaltyEndTimes.set(pid,Date.now()+penaltyDuration*1000);
         startPenaltyTicker();
         addLog('⚠ '+name+' penalized '+penaltyDuration+'s','var(--t-orange)');
       }
     }
-    // Re-arm round for remaining players
     host.armed=true;host.locked=false;host.buzzes=[];
     host._broadcast({type:'round_armed',timerDuration:host.timerDuration});
     setBoxWaiting();
-    document.getElementById('boxLabel').textContent='WAITING — 2ND CHANCE';
-  } else if(wrongCount===2){
-    // Second wrong — clear ALL penalties, open to everyone
-    addLog('✕ '+name+' answered wrong (2nd) — open to all','var(--t-secondary)');
-    showToast('Both wrong — open to everyone!','info');
-    // Clear all penalties on engine
+    document.getElementById('boxLabel').textContent='WAITING — PENALTY ACTIVE';
+  } else if(penaltyOnThisWrong===2){
+    // Clear ALL penalties, open to everyone
+    addLog('✕ '+name+' answered wrong — open to all','var(--t-secondary)');
+    showToast('Open to everyone!','info');
     for(const[,p]of host.players)p.penaltyUntil=0;
     penaltyEndTimes.clear();
-    // Tell players to clear their local penalty timers FIRST
     host._broadcast({type:'clear_all_penalties'});
-    // Then reset and re-arm with delays so players process in order
     setTimeout(()=>{
       host._broadcast({type:'round_reset'});
       host.armed=true;host.locked=false;host.buzzes=[];
@@ -460,9 +501,9 @@ function judgeWrong(){
     setBoxWaiting();
     document.getElementById('boxLabel').textContent='OPEN TO ALL';
   } else {
-    // 3rd+ wrong — just re-arm, no penalty
+    // Beyond — just re-arm, no penalty
     addLog('✕ '+name+' answered wrong — open again','var(--t-dim)');
-    showToast('Wrong again — still open','info');
+    showToast('Wrong — still open','info');
     host.armed=true;host.locked=false;host.buzzes=[];
     host._broadcast({type:'round_armed',timerDuration:host.timerDuration});
     setBoxWaiting();
@@ -570,6 +611,17 @@ function assignPlayer(pid,tid){
   const p=host.players.get(pid);if(p){p.team=tid;host._broadcastLobby();}
   const t=host.teams.get(tid);
   if(p&&t){addLog(p.name+' → '+t.name,t.color);showToast(p.name+' assigned to '+t.name,'info');}
+}
+
+// === Game Mode ===
+function setGameMode(mode){
+  gameMode=mode;
+  document.getElementById('modePenalty').classList.toggle('active',mode==='penalty');
+  document.getElementById('modeTimer').classList.toggle('active',mode==='timer');
+  document.getElementById('penaltyGroup').style.display=mode==='penalty'?'block':'none';
+  document.getElementById('modeHint').textContent=mode==='penalty'?'Wrong answer → team locked out → 2nd chance for others':'No penalties. Host uses RIGHT/WRONG freely. Simple mode.';
+  // Hide/show penalize buttons on team cards
+  document.querySelectorAll('.team-pen').forEach(el=>{el.style.display=mode==='penalty'?'flex':'none';});
 }
 
 // === Theme ===

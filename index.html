@@ -11,28 +11,52 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden}
-body{font-family:'Barlow',sans-serif;font-weight:700;background:#06060C;color:#E8E8F0;display:flex;align-items:center;justify-content:center;-webkit-font-smoothing:antialiased}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 25% 15%,rgba(0,229,255,.06) 0%,transparent 55%),radial-gradient(ellipse at 75% 85%,rgba(255,62,108,.04) 0%,transparent 55%);pointer-events:none}
-main{position:relative;z-index:1;text-align:center;padding:24px;width:100%;max-width:460px}
-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,16vw,88px);letter-spacing:clamp(10px,3vw,18px);padding-right:18px;background:linear-gradient(135deg,#00E5FF 0%,#76FF03 40%,#FF3E6C 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:glow 4s ease-in-out infinite alternate;line-height:1}
+html{height:100%;scroll-behavior:smooth}
+body{font-family:'Barlow',sans-serif;font-weight:700;background:#06060C;color:#E8E8F0;-webkit-font-smoothing:antialiased;min-height:100%}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 25% 15%,rgba(0,229,255,.06) 0%,transparent 55%),radial-gradient(ellipse at 75% 85%,rgba(255,62,108,.04) 0%,transparent 55%);pointer-events:none;z-index:0}
+main{position:relative;z-index:1;text-align:center;padding:clamp(40px,10vh,80px) 20px 40px;width:100%;max-width:460px;margin:0 auto}
+
+/* Hero */
+h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,15vw,80px);letter-spacing:clamp(10px,3vw,18px);padding-right:18px;background:linear-gradient(135deg,#00E5FF 0%,#76FF03 40%,#FF3E6C 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:glow 4s ease-in-out infinite alternate;line-height:1}
 @keyframes glow{0%{filter:brightness(1) drop-shadow(0 0 8px rgba(0,229,255,.3))}100%{filter:brightness(1.1) drop-shadow(0 0 16px rgba(255,62,108,.3))}}
-.tag{font-family:'Bebas Neue',sans-serif;font-size:clamp(14px,3.5vw,18px);color:#9090A8;letter-spacing:8px;margin:6px 0 clamp(40px,10vw,60px)}
-nav{display:flex;flex-direction:column;gap:16px}
-.b{display:block;text-decoration:none;font-family:'Bebas Neue',sans-serif;font-size:clamp(20px,5vw,26px);letter-spacing:6px;padding:clamp(18px,4.5vw,24px);border-radius:16px;text-align:center;transition:all .3s cubic-bezier(.34,1.56,.64,1);min-height:60px;display:flex;align-items:center;justify-content:center}
+.tag{font-family:'Bebas Neue',sans-serif;font-size:clamp(13px,3.5vw,17px);color:#9090A8;letter-spacing:8px;margin:6px 0 clamp(28px,7vw,44px)}
+
+/* How it works — animated walkthrough */
+.how{margin-bottom:clamp(28px,7vw,44px);position:relative}
+.how-label{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:5px;color:#555;margin-bottom:12px}
+.how-stage{background:#0E0E18;border:1px solid #222;border-radius:16px;padding:20px 16px;min-height:140px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.how-step{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;gap:6px;opacity:0;transform:translateY(20px);transition:all .5s ease}
+.how-step.active{opacity:1;transform:translateY(0)}
+.how-step.exit{opacity:0;transform:translateY(-20px)}
+.hs-icon{font-size:32px;line-height:1}
+.hs-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,5vw,24px);letter-spacing:3px;color:#fff}
+.hs-desc{font-size:clamp(12px,3vw,14px);color:#8888A0;max-width:320px;line-height:1.5;font-weight:600}
+.hs-accent{color:#00E5FF}.hs-warn{color:#FF9100}.hs-ok{color:#76FF03}.hs-bad{color:#FF3E6C}
+/* Progress dots */
+.how-dots{display:flex;gap:6px;justify-content:center;margin-top:10px}
+.how-dot{width:8px;height:8px;border-radius:50%;background:#333;transition:background .3s}
+.how-dot.on{background:#00E5FF}
+
+/* Buttons */
+nav{display:flex;flex-direction:column;gap:14px}
+.b{display:flex;align-items:center;justify-content:center;text-decoration:none;font-family:'Bebas Neue',sans-serif;font-size:clamp(20px,5vw,26px);letter-spacing:6px;padding:clamp(16px,4vw,22px);border-radius:16px;text-align:center;transition:all .3s cubic-bezier(.34,1.56,.64,1);min-height:58px}
 .bh{border:2px solid #00E5FF;color:#00E5FF;background:rgba(0,229,255,.04)}
 .bh:hover,.bh:focus-visible{background:#00E5FF;color:#06060C;transform:scale(1.03);outline:none}
 .bj{border:2px solid #FF3E6C;color:#FF3E6C;background:rgba(255,62,108,.04)}
 .bj:hover,.bj:focus-visible{background:#FF3E6C;color:#06060C;transform:scale(1.03);outline:none}
-.install-btn{display:none;margin-top:16px;font-family:'Barlow',sans-serif;font-size:15px;font-weight:800;letter-spacing:1px;padding:12px 24px;border:1px solid #444;background:rgba(255,255,255,.04);color:#9090A8;border-radius:12px;cursor:pointer;min-height:48px}
+.install-btn{display:none;margin-top:14px;font-family:'Barlow',sans-serif;font-size:15px;font-weight:800;letter-spacing:1px;padding:12px 24px;border:1px solid #444;background:rgba(255,255,255,.04);color:#9090A8;border-radius:12px;cursor:pointer;min-height:48px}
 .install-btn:hover{border-color:#666;color:#ccc}
-.sig{margin-top:clamp(36px,9vw,56px);text-align:center}
+
+/* Signature */
+.sig{margin-top:clamp(32px,8vw,48px);text-align:center;padding-bottom:20px}
 .sig-line{width:40px;height:1px;background:linear-gradient(90deg,transparent,#444,transparent);margin:0 auto 14px}
 .sig-text{font-size:clamp(11px,2.8vw,13px);color:#6b6b80;letter-spacing:3px;font-weight:600}
 .sig-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(16px,4vw,20px);letter-spacing:6px;background:linear-gradient(135deg,#00E5FF,#FF3E6C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;vertical-align:middle}
 .sig-copy{font-size:10px;color:#444;letter-spacing:2px;margin-top:6px;font-weight:600}
+
+/* Fade-in */
 main>*{opacity:0;transform:translateY(16px);animation:fu .6s ease forwards}
-main>*:nth-child(1){animation-delay:.1s}main>*:nth-child(2){animation-delay:.2s}main>*:nth-child(3){animation-delay:.35s}main>*:nth-child(4){animation-delay:.55s}
+main>*:nth-child(1){animation-delay:.1s}main>*:nth-child(2){animation-delay:.2s}main>*:nth-child(3){animation-delay:.3s}main>*:nth-child(4){animation-delay:.45s}main>*:nth-child(5){animation-delay:.6s}
 @keyframes fu{to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
@@ -40,6 +64,45 @@ main>*:nth-child(1){animation-delay:.1s}main>*:nth-child(2){animation-delay:.2s}
 <main>
   <h1>BUZZER</h1>
   <p class="tag">REAL-TIME GAME BUZZER</p>
+
+  <!-- Animated walkthrough -->
+  <div class="how" id="howSection">
+    <div class="how-label">HOW IT WORKS</div>
+    <div class="how-stage" id="howStage">
+      <div class="how-step active" data-step="0">
+        <div class="hs-icon">📱</div>
+        <div class="hs-title">HOST CREATES A ROOM</div>
+        <div class="hs-desc">One person hosts. Everyone else <span class="hs-accent">scans the QR code</span> or enters the room code to join.</div>
+      </div>
+      <div class="how-step" data-step="1">
+        <div class="hs-icon">👆</div>
+        <div class="hs-title">HOST READS THE QUESTION</div>
+        <div class="hs-desc">Host taps <span class="hs-accent">the box</span> to arm the buzzers. Players race to buzz first!</div>
+      </div>
+      <div class="how-step" data-step="2">
+        <div class="hs-icon">🏆</div>
+        <div class="hs-title">FIRST BUZZ WINS THE TURN</div>
+        <div class="hs-desc">The fastest player's name appears. Host taps <span class="hs-ok">✓ RIGHT</span> or <span class="hs-bad">✕ WRONG</span>.</div>
+      </div>
+      <div class="how-step" data-step="3">
+        <div class="hs-icon">⚠️</div>
+        <div class="hs-title">WRONG? PENALTY MODE</div>
+        <div class="hs-desc">1st wrong → <span class="hs-warn">team locked out</span> for 10s, others get a chance. 2nd wrong → <span class="hs-accent">open to everyone</span>.</div>
+      </div>
+      <div class="how-step" data-step="4">
+        <div class="hs-icon">🔄</div>
+        <div class="hs-title">OR USE TIMER MODE</div>
+        <div class="hs-desc">No penalties. Host controls a <span class="hs-accent">visible countdown timer</span>. Players buzz freely. Simple and fast.</div>
+      </div>
+      <div class="how-step" data-step="5">
+        <div class="hs-icon">🎨</div>
+        <div class="hs-title">TEAMS · THEMES · QR SHARING</div>
+        <div class="hs-desc">Create teams, pick a theme, share via QR. Works on <span class="hs-accent">any phone</span> — no app needed.</div>
+      </div>
+    </div>
+    <div class="how-dots" id="howDots"></div>
+  </div>
+
   <nav aria-label="Main">
     <a href="host.html" class="b bh" role="button">⚡ HOST GAME</a>
     <a href="join.html" class="b bj" role="button">🎮 JOIN GAME</a>
@@ -52,6 +115,30 @@ main>*:nth-child(1){animation-delay:.1s}main>*:nth-child(2){animation-delay:.2s}
   </div>
 </main>
 <script>
+// Animated walkthrough — auto-plays through steps
+const STEP_COUNT=6,STEP_DURATION=3200;
+let currentStep=0,howTimer=null;
+function initHow(){
+  const dots=document.getElementById('howDots');
+  dots.innerHTML=Array.from({length:STEP_COUNT},(_,i)=>'<div class="how-dot '+(i===0?'on':'')+'" data-i="'+i+'"></div>').join('');
+  dots.querySelectorAll('.how-dot').forEach(d=>d.addEventListener('click',()=>{goToStep(parseInt(d.dataset.i));resetTimer();}));
+  howTimer=setInterval(nextStep,STEP_DURATION);
+}
+function nextStep(){goToStep((currentStep+1)%STEP_COUNT);}
+function goToStep(n){
+  const steps=document.querySelectorAll('.how-step');
+  steps[currentStep].classList.remove('active');steps[currentStep].classList.add('exit');
+  setTimeout(()=>steps[currentStep-currentStep===n?0:currentStep].classList.remove('exit'),500);
+  const prev=currentStep;currentStep=n;
+  // Clear all exit states
+  setTimeout(()=>{steps.forEach(s=>{if(!s.classList.contains('active'))s.classList.remove('exit');});},500);
+  steps[currentStep].classList.add('active');
+  document.querySelectorAll('.how-dot').forEach((d,i)=>d.classList.toggle('on',i===currentStep));
+}
+function resetTimer(){clearInterval(howTimer);howTimer=setInterval(nextStep,STEP_DURATION);}
+window.addEventListener('DOMContentLoaded',initHow);
+
+// PWA
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('installBtn').style.display='block';});
 function installPWA(){if(!deferredPrompt)return;deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('installBtn').style.display='none';});}
