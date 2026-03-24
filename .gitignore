@@ -1,0 +1,28 @@
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+credentials.json
+token.json
+service-account*.json
+
+# Node.js
+node_modules/
+
+# Claude / Superpowers
+.claude/
+.superpowers/
+CLAUDE.md
+
+# Logs & Temp
+*.log
+.tmp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
